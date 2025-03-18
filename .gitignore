@@ -1,0 +1,19 @@
+# Docker
+.dockerignore
+Dockerfile
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Env
+.env*
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
