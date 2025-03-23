@@ -8,6 +8,7 @@ CREATE TABLE Usuarios (
     mail VARCHAR(60) NOT NULL,
     telefono VARCHAR(30) NOT NULL,
     contraseña VARCHAR(60) NOT NULL,
+    rol VARCHAR(30) NOT NULL DEFAULT 'usuario',
     PRIMARY KEY (id)
 );
 
