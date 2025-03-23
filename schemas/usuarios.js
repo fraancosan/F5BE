@@ -12,3 +12,7 @@ const usuariosSchema = z.object({
 export function validateUsuarios(data) {
   return usuariosSchema.safeParse(data);
 }
+
+export function validatePartialUsuarios(data) {
+  return usuariosSchema.partial().safeParse(data);
+}
