@@ -5,6 +5,15 @@ const politicasSchema = z.object({
   descripcion: z.string().min(3).max(50),
 });
 
+const politicasUpdateSchema = politicasSchema.pick({
+  nombre: false,
+  descripcion: true,
+});
+
 export function validatePoliticas(data) {
   return politicasSchema.safeParse(data);
+}
+
+export function validatePoliticasUpdate(data) {
+  return politicasUpdateSchema.safeParse(data);
 }
