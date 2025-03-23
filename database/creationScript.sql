@@ -3,7 +3,7 @@ USE f5_rodo;
 
 CREATE TABLE Usuarios (
     id INT AUTO_INCREMENT NOT NULL,
-    dni VARCHAR(30) NOT NULL,
+    dni VARCHAR(8) NOT NULL,
     nombre VARCHAR(60) NOT NULL,
     mail VARCHAR(60) NOT NULL,
     telefono VARCHAR(30) NOT NULL,
