@@ -11,3 +11,7 @@ const torneosSchema = z.object({
 export function validateTorneos(data) {
   return torneosSchema.safeParse(data);
 }
+
+export function validatePartialTorneos(data) {
+  return torneosSchema.partial().safeParse(data);
+}
