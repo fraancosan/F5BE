@@ -5,7 +5,7 @@ CREATE TABLE Usuarios (
     id INT AUTO_INCREMENT NOT NULL,
     dni VARCHAR(8) NOT NULL,
     nombre VARCHAR(60) NOT NULL,
-    mail VARCHAR(60) NOT NULL,
+    mail VARCHAR(60) NOT NULL UNIQUE,
     telefono VARCHAR(30) NOT NULL,
     contraseña VARCHAR(60) NOT NULL,
     rol VARCHAR(30) NOT NULL DEFAULT 'usuario',
