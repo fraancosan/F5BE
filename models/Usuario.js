@@ -33,6 +33,7 @@ export const usuarioModel = db.define(
     rol: {
       type: DataTypes.STRING(30),
       allowNull: false,
+      defaultValue: 'usuario',
     },
   },
   {
