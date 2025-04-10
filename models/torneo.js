@@ -1,5 +1,6 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
+import { equipoModel } from './equipo.js';
 
 export const torneoModel = db.define(
   'torneo',
@@ -33,3 +34,8 @@ export const torneoModel = db.define(
     timestamps: false,
   },
 );
+
+torneoModel.belongsToMany(equipoModel, {
+  through: 'equipoTorneo',
+  foreignKey: 'idTorneo',
+});
