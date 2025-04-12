@@ -11,6 +11,7 @@ export const canchaModel = db.define(
     },
   },
   {
+    tableName: 'Canchas',
     freezeTableName: false,
     timestamps: false,
   },
