@@ -1,7 +1,7 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
-export const canchaModel = db.define(
+const canchaModel = db.define(
   'cancha',
   {
     disponible: {
@@ -16,3 +16,5 @@ export const canchaModel = db.define(
     timestamps: false,
   },
 );
+
+export default canchaModel;
