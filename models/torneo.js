@@ -2,7 +2,7 @@ import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
 const torneoModel = db.define(
-  'torneo',
+  'Torneos',
   {
     descripcion: {
       type: DataTypes.STRING(255),
