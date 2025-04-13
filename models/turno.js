@@ -1,7 +1,7 @@
 import db from "../database/connection.js";
 import { DataTypes } from "sequelize";
-import { canchaModel } from "./cancha.js";
-import { usuarioModel } from "./Usuario.js";
+import  canchaModel  from "./cancha.js";
+import  usuarioModel  from "./Usuario.js";
 
 
 const turnoModel = db.define("turno", {
