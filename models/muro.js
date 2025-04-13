@@ -1,7 +1,7 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
-export const muroModel = db.define(
+const muroModel = db.define(
   'muro',
   {
     titulo: {
@@ -24,6 +24,8 @@ export const muroModel = db.define(
   {
     freezeTableName: false,
     timestamps: false,
-    tableName: 'muro',
+    tableName: 'Muro',
   },
 );
+
+export default muroModel;
