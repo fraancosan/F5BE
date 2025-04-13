@@ -3,7 +3,7 @@ import { DataTypes } from 'sequelize';
 import  equipoModel  from './equipo.js';
 import  torneoModel  from './torneo.js';
 
-export const partidoTorneoModel = db.define(
+const partidoTorneoModel = db.define(
   'PartidosTorneo',
   {
     id: {
@@ -51,3 +51,5 @@ export const partidoTorneoModel = db.define(
     tableName: 'PartidosTorneo',
   },
 );
+
+export default partidoTorneoModel;
