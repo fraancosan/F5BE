@@ -1,8 +1,8 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
-export const politicaModel = db.define(
-  'politica',
+const politicaModel = db.define(
+  'Politicas',
   {
     nombre: {
       type: DataTypes.STRING(50),
@@ -20,3 +20,5 @@ export const politicaModel = db.define(
     timestamps: false,
   },
 );
+
+export default politicaModel;
