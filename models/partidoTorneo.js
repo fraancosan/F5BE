@@ -1,10 +1,10 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
-import { equipoModel } from './equipo.js';
-import { torneoModel } from './torneo.js';
+import  equipoModel  from './equipo.js';
+import  torneoModel  from './torneo.js';
 
 export const partidoTorneoModel = db.define(
-  'partidoTorneo',
+  'PartidosTorneo',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -48,6 +48,6 @@ export const partidoTorneoModel = db.define(
   {
     freezeTableName: false,
     timestamps: false,
-    tableName: 'partidosTorneo',
+    tableName: 'PartidosTorneo',
   },
 );
