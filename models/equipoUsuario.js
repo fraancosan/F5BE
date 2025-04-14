@@ -1,10 +1,10 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 import equipoModel from './equipo.js';
-import torneoModel from './torneo.js';
+import usuarioModel from './Usuario.js';
 
-const partidoTorneoModel = db.define(
-  'PartidosTorneo',
+const equipoUsuarioModel = db.define(
+  'EquiposUsuarios',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -12,7 +12,7 @@ const partidoTorneoModel = db.define(
       autoIncrement: true,
       allowNull: false,
     },
-    idEquipo1: {
+    idEquipo: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -20,36 +20,24 @@ const partidoTorneoModel = db.define(
         key: 'id',
       },
     },
-    idEquipo2: {
+    idUsuario: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: equipoModel,
+        model: usuarioModel,
         key: 'id',
       },
     },
-    idTorneo: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: torneoModel,
-        key: 'id',
-      },
-    },
-    resultado: {
-      type: DataTypes.STRING(30),
-      allowNull: false,
-    },
-    fecha: {
-      type: DataTypes.DATE,
+    capitan: {
+      type: DataTypes.INTEGER(1),
+      defaultValue: 0,
       allowNull: false,
     },
   },
   {
     freezeTableName: false,
     timestamps: false,
-    tableName: 'PartidosTorneo',
   },
 );
 
-export default partidoTorneoModel;
+export default equipoUsuarioModel;
