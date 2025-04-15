@@ -38,6 +38,8 @@ export class equipoController {
           where: { id },
           include: {
             model: torneoModel,
+            attributes: ['id', 'descripcion', 'fechaInicio', 'fechaFin'],
+            through: { attributes: [] }, // Excluir atributos de la tabla intermedia
           },
         });
       } else {
