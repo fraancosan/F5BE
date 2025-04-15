@@ -105,4 +105,40 @@ export class equipoController {
       res.status(500).json({ error: 'Error al eliminar el equipo' });
     }
   }
+
+  static async addTorneo(req, res) {
+    try {
+      const { id, idTorneo } = req.params;
+      const equipo = await equipoModel.findByPk(id);
+      const torneo = await torneoModel.findByPk(idTorneo);
+
+      if (!equipo || !torneo) {
+        return res.status(404).json({ error: 'Equipo o torneo no encontrado' });
+      }
+
+      await equipo.addTorneo(torneo);
+      res.status(200).json({ message: 'Torneo agregado al equipo' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al agregar el torneo al equipo' });
+    }
+  }
+
+  static async removeTorneo(req, res) {
+    try {
+      const { id, idTorneo } = req.params;
+      const equipo = await equipoModel.findByPk(id);
+      const torneo = await torneoModel.findByPk(idTorneo);
+
+      if (!equipo || !torneo) {
+        return res.status(404).json({ error: 'Equipo o torneo no encontrado' });
+      }
+
+      await equipo.removeTorneo(torneo);
+      res.status(200).json({ message: 'Torneo eliminado del equipo' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el torneo del equipo' });
+    }
+  }
 }
