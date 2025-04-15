@@ -79,12 +79,12 @@ export class equipoController {
         return res.status(400).json({ error: result.error });
       }
 
-      let equipo = await equipoModel.findByPk(id);
+      const equipo = await equipoModel.findByPk(id);
       if (!equipo) {
         return res.status(404).json({ error: 'Equipo no encontrado' });
       }
 
-      equipo = await equipo.update(result.data);
+      await equipo.update(result.data);
       res.status(200).json(equipo);
     } catch (error) {
       console.error(error);
