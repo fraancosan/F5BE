@@ -53,4 +53,41 @@ export class equipoController {
       res.status(500).json({ error: 'Error al crear el equipo' });
     }
   }
+
+  static async update(req, res) {
+    try {
+      const { id } = req.params;
+      const result = validateEquipos(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      let equipo = await equipoModel.findByPk(id);
+      if (!equipo) {
+        return res.status(404).json({ error: 'Equipo no encontrado' });
+      }
+
+      equipo = await equipo.update(result.data);
+      res.status(200).json(equipo);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al actualizar el equipo' });
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const equipo = await equipoModel.findByPk(id);
+      if (!equipo) {
+        return res.status(404).json({ error: 'Equipo no encontrado' });
+      }
+
+      await equipo.destroy();
+      res.status(200).json({ message: 'Equipo eliminado' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el equipo' });
+    }
+  }
 }
