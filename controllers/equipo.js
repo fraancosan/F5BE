@@ -1,4 +1,6 @@
 import equipoModel from '../models/equipo.js';
+import torneoModel from '../models/torneo.js';
+import '../models/associations.js';
 import { validateEquipos } from '../schemas/equipos.js';
 
 export class equipoController {
@@ -28,7 +30,20 @@ export class equipoController {
   static async getById(req, res) {
     try {
       const { id } = req.params;
-      const equipo = await equipoModel.findByPk(id);
+      // booleano para verificar si se debe incluir el torneo
+      const torneo = req.query.torneo === 'true';
+      let equipo;
+      if (torneo) {
+        equipo = await equipoModel.findOne({
+          where: { id },
+          include: {
+            model: torneoModel,
+          },
+        });
+      } else {
+        equipo = await equipoModel.findByPk(id);
+      }
+
       if (!equipo) {
         return res.status(404).json({ error: 'Equipo no encontrado' });
       }
