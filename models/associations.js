@@ -5,9 +5,11 @@ import torneoModel from './torneo.js';
 torneoModel.belongsToMany(equipoModel, {
   through: 'equipostorneos',
   foreignKey: 'idTorneo',
+  timestamps: false,
 });
 
 equipoModel.belongsToMany(torneoModel, {
   through: 'equipostorneos',
   foreignKey: 'idEquipo',
+  timestamps: false,
 });
