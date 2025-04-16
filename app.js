@@ -2,6 +2,7 @@ import express, { json } from 'express';
 import cors from 'cors';
 import { equipoRouter } from './routes/equipo.js';
 import { torneoRouter } from './routes/torneo.js';
+import { politicaRouter } from './routes/politica.js';
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.disable('x-powered-by');
 // Routes
 app.use('/equipos', equipoRouter);
 app.use('/torneos', torneoRouter);
+app.use('/politicas', politicaRouter);
 app.get('/', (_, res) => {
   res.status(404).json({ error: 'Recurso no encontrado' });
 });
