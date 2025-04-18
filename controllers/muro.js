@@ -51,7 +51,7 @@ export class muroController {
         return res.status(400).json({ error: result.error });
       }
 
-      const newMuro = await muroModel.create(result.data);
+      const newMuro = await muroModel.create(body);
       res.status(201).json(newMuro);
     } catch (error) {
       console.error(error);
@@ -62,7 +62,17 @@ export class muroController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const result = validatePartialMuro(req.body);
+      // Parseo de las fechas a tipo Date (SOLO POR TESTEO EN POSTMAN)
+      let body = req.body;
+      console.log(body);
+      if (body.fecha) {
+        body.fecha = new Date(body.fecha);
+      }
+      if (body.fechaFin) {
+        body.fechaFin = new Date(body.fechaFin);
+      }
+
+      const result = validatePartialMuro(body);
       if (!result.success) {
         return res.status(400).json({ error: result.error });
       }
@@ -72,7 +82,7 @@ export class muroController {
         return res.status(404).json({ error: 'Muro no encontrado' });
       }
 
-      await muro.update(result.data);
+      await muro.update(body);
       res.status(200).json(muro);
     } catch (error) {
       console.error(error);
