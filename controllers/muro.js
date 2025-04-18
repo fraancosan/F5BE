@@ -41,7 +41,12 @@ export class muroController {
 
   static async create(req, res) {
     try {
-      const result = validateMuro(req.body);
+      // Parseo de las fechas a tipo Date (SOLO POR TESTEO EN POSTMAN)
+      let body = req.body;
+      body.fecha = new Date(body.fecha);
+      body.fechaFin = new Date(body.fechaFin);
+
+      const result = validateMuro(body);
       if (!result.success) {
         return res.status(400).json({ error: result.error });
       }
