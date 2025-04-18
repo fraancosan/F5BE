@@ -21,5 +21,5 @@ export function validateMuro(data) {
 }
 
 export function validatePartialMuro(data) {
-  return muroPartialSchema.safeParse(data);
+  return muroPartialSchema.partial().safeParse(data);
 }
