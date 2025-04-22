@@ -46,9 +46,8 @@ const partidoTorneoModel = db.define(
     },
   },
   {
-    freezeTableName: false,
+    freezeTableName: true,
     timestamps: false,
-    tableName: 'PartidosTorneo',
   },
 );
 

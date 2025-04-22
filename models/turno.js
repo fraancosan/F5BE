@@ -4,7 +4,7 @@ import canchaModel from './cancha.js';
 import usuarioModel from './Usuario.js';
 
 const turnoModel = db.define(
-  'turno',
+  'Turnos',
   {
     id: {
       type: DataTypes.INTEGER,
