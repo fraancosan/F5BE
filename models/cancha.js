@@ -2,7 +2,7 @@ import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
 const canchaModel = db.define(
-  'cancha',
+  'Canchas',
   {
     disponible: {
       type: DataTypes.INTEGER(1),
@@ -11,7 +11,6 @@ const canchaModel = db.define(
     },
   },
   {
-    tableName: 'Canchas',
     freezeTableName: false,
     timestamps: false,
   },

@@ -2,7 +2,7 @@ import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 
 const muroModel = db.define(
-  'muro',
+  'Muro',
   {
     titulo: {
       type: DataTypes.STRING(255),
@@ -22,9 +22,8 @@ const muroModel = db.define(
     },
   },
   {
-    freezeTableName: false,
+    freezeTableName: true,
     timestamps: false,
-    tableName: 'Muro',
   },
 );
 
