@@ -1,0 +1,154 @@
+import usuarioModel from '../models/Usuario.js';
+import {
+  validateUsuarios,
+  validatePartialUsuarios,
+} from '../schemas/usuarios.js';
+
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+export class UsuarioController {
+  static async getAll(req, res) {
+    try {
+      const mail = req.query.mail;
+      const result = validatePartialUsuarios({ mail });
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+      const usuarios = await usuarioModel.findAll({
+        where: mail ? { mail } : {},
+        order: [['nombre', 'ASC']],
+      });
+      if (usuarios.length === 0) {
+        return res.status(404).json({ error: 'No se encontraron usuarios' });
+      }
+      res.status(200).json(usuarios);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener los usuarios' });
+    }
+  }
+
+  static async getById(req, res) {
+    try {
+      const { id } = req.params;
+      const usuario = await usuarioModel.findByPk(id);
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+      res.status(200).json(usuario);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener el usuario' });
+    }
+  }
+
+  static async create(req, res) {
+    try {
+      const result = validateUsuarios(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      // Encriptar la contraseña
+      const salt = await bcrypt.genSalt(10);
+      result.data.contraseña = await bcrypt.hash(result.data.contraseña, salt);
+
+      const usuario = await usuarioModel.create(result.data);
+      res.status(201).json(usuario);
+    } catch (error) {
+      if (error.message.includes('Validation error')) {
+        res
+          .status(409)
+          .json({ error: 'El mail ingresado ya se encuentra registrado' });
+      } else {
+        res.status(500).json({ error: 'Error al crear el usuario' });
+      }
+    }
+  }
+
+  static async update(req, res) {
+    try {
+      const { id } = req.params;
+      const result = validatePartialUsuarios(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      const usuario = await usuarioModel.findByPk(id);
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      // Encriptar la contraseña si se actualiza
+      if (result.data.contraseña) {
+        const salt = await bcrypt.genSalt(10);
+        result.data.contraseña = await bcrypt.hash(
+          result.data.contraseña,
+          salt,
+        );
+      }
+
+      await usuario.update(result.data);
+      res.status(200).json(usuario);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al actualizar el usuario' });
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const { id } = req.params;
+      const usuario = await usuarioModel.findByPk(id);
+      if (!usuario) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      await usuario.destroy();
+      res.status(200).json({ message: 'Usuario eliminado' });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el usuario' });
+    }
+  }
+
+  static async loginUser(req, res) {
+    try {
+      const result = validatePartialUsuarios(req.body);
+      if (result.error) {
+        return res.status(400).json({ error: result.error });
+      } else {
+        const { mail, contraseña } = result.data;
+        const usuario = await usuarioModel.findOne({ where: { mail } });
+        if (!usuario) {
+          res
+            .status(400)
+            .json({ error: 'El mail o la contraseña no son correctos' });
+        } else {
+          const match = await bcrypt.compare(contraseña, usuario.contraseña);
+          if (!match) {
+            res
+              .status(400)
+              .json({ error: 'El mail o la contraseña no son correctos' });
+          } else {
+            const token = jwt.sign(
+              {
+                mail: usuario.mail,
+                id: usuario.id,
+                rol: usuario.rol,
+              },
+              process.env.JWT_PASSWORD,
+              { expiresIn: '1h' },
+            );
+            res.json({ message: 'Usuario logueado', token: token });
+          }
+        }
+      }
+    } catch (error) {
+      res.status(500).json({
+        error: 'Ocurrio un error a la hora de loguear el usuario',
+      });
+    }
+  }
+}
