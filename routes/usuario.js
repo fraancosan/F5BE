@@ -12,3 +12,5 @@ usuarioRouter.post('/', UsuarioController.create);
 usuarioRouter.patch('/:id', UsuarioController.update);
 
 usuarioRouter.delete('/:id', UsuarioController.delete);
+
+usuarioRouter.post('/login', UsuarioController.loginUser);
