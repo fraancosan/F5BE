@@ -5,6 +5,7 @@ import { torneoRouter } from './routes/torneo.js';
 import { politicaRouter } from './routes/politica.js';
 import { muroRouter } from './routes/muro.js';
 import { canchaRouter } from './routes/cancha.js';
+import { usuarioRouter } from './routes/usuario.js';
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/torneos', torneoRouter);
 app.use('/politicas', politicaRouter);
 app.use('/muros', muroRouter);
 app.use('/canchas', canchaRouter);
+app.use('/usuarios', usuarioRouter);
 app.get('/', (_, res) => {
   res.status(404).json({ error: 'Recurso no encontrado' });
 });
