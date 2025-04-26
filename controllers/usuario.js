@@ -13,19 +13,19 @@ export class UsuarioController {
       const mail = req.query.mail;
       const result = validatePartialUsuarios({ mail });
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
       const usuarios = await usuarioModel.findAll({
         where: mail ? { mail } : {},
         order: [['nombre', 'ASC']],
       });
       if (usuarios.length === 0) {
-        return res.status(404).json({ error: 'No se encontraron usuarios' });
+        return res.status(404).json({ message: 'No se encontraron usuarios' });
       }
       res.status(200).json(usuarios);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener los usuarios' });
+      res.status(500).json({ message: 'Error al obtener los usuarios' });
     }
   }
 
@@ -34,12 +34,12 @@ export class UsuarioController {
       const { id } = req.params;
       const usuario = await usuarioModel.findByPk(id);
       if (!usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+        return res.status(404).json({ message: 'Usuario no encontrado' });
       }
       res.status(200).json(usuario);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener el usuario' });
+      res.status(500).json({ message: 'Error al obtener el usuario' });
     }
   }
 
@@ -47,7 +47,7 @@ export class UsuarioController {
     try {
       const result = validateUsuarios(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       // Encriptar la contraseña
@@ -62,7 +62,7 @@ export class UsuarioController {
           .status(409)
           .json({ error: 'El mail ingresado ya se encuentra registrado' });
       } else {
-        res.status(500).json({ error: 'Error al crear el usuario' });
+        res.status(500).json({ message: 'Error al crear el usuario' });
       }
     }
   }
@@ -72,12 +72,12 @@ export class UsuarioController {
       const { id } = req.params;
       const result = validatePartialUsuarios(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const usuario = await usuarioModel.findByPk(id);
       if (!usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+        return res.status(404).json({ message: 'Usuario no encontrado' });
       }
 
       // Encriptar la contraseña si se actualiza
@@ -93,7 +93,7 @@ export class UsuarioController {
       res.status(200).json(usuario);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al actualizar el usuario' });
+      res.status(500).json({ message: 'Error al actualizar el usuario' });
     }
   }
 
@@ -102,14 +102,14 @@ export class UsuarioController {
       const { id } = req.params;
       const usuario = await usuarioModel.findByPk(id);
       if (!usuario) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
+        return res.status(404).json({ message: 'Usuario no encontrado' });
       }
 
       await usuario.destroy();
       res.status(200).json({ message: 'Usuario eliminado' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el usuario' });
+      res.status(500).json({ message: 'Error al eliminar el usuario' });
     }
   }
 
@@ -117,20 +117,20 @@ export class UsuarioController {
     try {
       const result = validatePartialUsuarios(req.body);
       if (result.error) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       } else {
         const { mail, contraseña } = result.data;
         const usuario = await usuarioModel.findOne({ where: { mail } });
         if (!usuario) {
           res
             .status(400)
-            .json({ error: 'El mail o la contraseña no son correctos' });
+            .json({ message: 'El mail o la contraseña no son correctos' });
         } else {
           const match = await bcrypt.compare(contraseña, usuario.contraseña);
           if (!match) {
             res
               .status(400)
-              .json({ error: 'El mail o la contraseña no son correctos' });
+              .json({ message: 'El mail o la contraseña no son correctos' });
           } else {
             const token = jwt.sign(
               {
@@ -147,7 +147,7 @@ export class UsuarioController {
       }
     } catch (error) {
       res.status(500).json({
-        error: 'Ocurrio un error a la hora de loguear el usuario',
+        message: 'Ocurrio un error a la hora de loguear el usuario',
       });
     }
   }

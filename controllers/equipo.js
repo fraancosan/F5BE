@@ -10,7 +10,7 @@ export class equipoController {
       if (nombre) {
         const result = validateEquipos({ nombre });
         if (!result.success) {
-          return res.status(400).json({ error: result.error });
+          return res.status(400).json({ message: result.error });
         }
       }
 
@@ -18,12 +18,12 @@ export class equipoController {
         where: nombre ? { nombre } : {},
       });
       if (!equipos || equipos.length === 0) {
-        return res.status(404).json({ error: 'No se encontraron equipos' });
+        return res.status(404).json({ message: 'No se encontraron equipos' });
       }
       res.status(200).json(equipos);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener los equipos' });
+      res.status(500).json({ message: 'Error al obtener los equipos' });
     }
   }
 
@@ -47,12 +47,12 @@ export class equipoController {
       }
 
       if (!equipo) {
-        return res.status(404).json({ error: 'Equipo no encontrado' });
+        return res.status(404).json({ message: 'Equipo no encontrado' });
       }
       res.status(200).json(equipo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener el equipo' });
+      res.status(500).json({ message: 'Error al obtener el equipo' });
     }
   }
 
@@ -60,14 +60,14 @@ export class equipoController {
     try {
       const result = validateEquipos(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const newEquipo = await equipoModel.create(result.data);
       res.status(201).json(newEquipo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al crear el equipo' });
+      res.status(500).json({ message: 'Error al crear el equipo' });
     }
   }
 
@@ -76,19 +76,19 @@ export class equipoController {
       const { id } = req.params;
       const result = validateEquipos(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const equipo = await equipoModel.findByPk(id);
       if (!equipo) {
-        return res.status(404).json({ error: 'Equipo no encontrado' });
+        return res.status(404).json({ message: 'Equipo no encontrado' });
       }
 
       await equipo.update(result.data);
       res.status(200).json(equipo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al actualizar el equipo' });
+      res.status(500).json({ message: 'Error al actualizar el equipo' });
     }
   }
 
@@ -97,14 +97,14 @@ export class equipoController {
       const { id } = req.params;
       const equipo = await equipoModel.findByPk(id);
       if (!equipo) {
-        return res.status(404).json({ error: 'Equipo no encontrado' });
+        return res.status(404).json({ message: 'Equipo no encontrado' });
       }
 
       await equipo.destroy();
       res.status(200).json({ message: 'Equipo eliminado' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el equipo' });
+      res.status(500).json({ message: 'Error al eliminar el equipo' });
     }
   }
 
@@ -115,14 +115,16 @@ export class equipoController {
       const torneo = await torneoModel.findByPk(idTorneo);
 
       if (!equipo || !torneo) {
-        return res.status(404).json({ error: 'Equipo o torneo no encontrado' });
+        return res
+          .status(404)
+          .json({ message: 'Equipo o torneo no encontrado' });
       }
 
       await equipo.addTorneo(torneo);
       res.status(200).json({ message: 'Torneo agregado al equipo' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al agregar el torneo al equipo' });
+      res.status(500).json({ message: 'Error al agregar el torneo al equipo' });
     }
   }
 
@@ -133,14 +135,18 @@ export class equipoController {
       const torneo = await torneoModel.findByPk(idTorneo);
 
       if (!equipo || !torneo) {
-        return res.status(404).json({ error: 'Equipo o torneo no encontrado' });
+        return res
+          .status(404)
+          .json({ message: 'Equipo o torneo no encontrado' });
       }
 
       await equipo.removeTorneo(torneo);
       res.status(200).json({ message: 'Torneo eliminado del equipo' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el torneo del equipo' });
+      res
+        .status(500)
+        .json({ message: 'Error al eliminar el torneo del equipo' });
     }
   }
 }
