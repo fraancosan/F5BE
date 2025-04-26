@@ -11,7 +11,7 @@ export class politicaController {
       if (descripcion) {
         const result = validatePoliticasUpdate({ descripcion });
         if (!result.success) {
-          return res.status(400).json({ error: result.error });
+          return res.status(400).json({ message: result.error });
         }
       }
 
@@ -19,12 +19,12 @@ export class politicaController {
         where: descripcion ? { descripcion } : {},
       });
       if (!politicas || politicas.length === 0) {
-        return res.status(404).json({ error: 'No se encontraron politicas' });
+        return res.status(404).json({ message: 'No se encontraron politicas' });
       }
       res.status(200).json(politicas);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener las politicas' });
+      res.status(500).json({ message: 'Error al obtener las politicas' });
     }
   }
 
@@ -34,12 +34,12 @@ export class politicaController {
       const politica = await politicaModel.findByPk(id);
 
       if (!politica) {
-        return res.status(404).json({ error: 'Politica no encontrada' });
+        return res.status(404).json({ message: 'Politica no encontrada' });
       }
       res.status(200).json(politica);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener la politica' });
+      res.status(500).json({ message: 'Error al obtener la politica' });
     }
   }
 
@@ -47,14 +47,14 @@ export class politicaController {
     try {
       const result = validatePoliticas(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const newPolitica = await politicaModel.create(result.data);
       res.status(201).json(newPolitica);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al crear la politica' });
+      res.status(500).json({ message: 'Error al crear la politica' });
     }
   }
 
@@ -63,18 +63,18 @@ export class politicaController {
       const { id } = req.params;
       const result = validatePoliticasUpdate(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const politica_updated = await politicaModel.findByPk(id);
       if (!politica_updated) {
-        return res.status(404).json({ error: 'Politica no encontrada' });
+        return res.status(404).json({ message: 'Politica no encontrada' });
       }
       await politica_updated.update(result.data);
       res.status(200).json(politica_updated);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al actualizar la politica' });
+      res.status(500).json({ message: 'Error al actualizar la politica' });
     }
   }
 
@@ -85,12 +85,12 @@ export class politicaController {
         where: { nombre: id },
       });
       if (!deleted) {
-        return res.status(404).json({ error: 'Politica no encontrada' });
+        return res.status(404).json({ message: 'Politica no encontrada' });
       }
       res.status(200).json({ message: 'Politica eliminada' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar la politica' });
+      res.status(500).json({ message: 'Error al eliminar la politica' });
     }
   }
 }

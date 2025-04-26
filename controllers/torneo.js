@@ -9,7 +9,7 @@ export class torneoController {
       const { descripcion } = req.query;
       const result = validatePartialTorneos({ descripcion });
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
       //validar los parámetros de consulta de equipo
       const torneos = await torneoModel.findAll({
@@ -18,12 +18,12 @@ export class torneoController {
       });
 
       if (torneos.length === 0) {
-        return res.status(404).json({ error: 'No se encontraron torneos' });
+        return res.status(404).json({ message: 'No se encontraron torneos' });
       }
       res.status(200).json(torneos);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener los torneos' });
+      res.status(500).json({ message: 'Error al obtener los torneos' });
     }
   }
 
@@ -38,12 +38,12 @@ export class torneoController {
       });
 
       if (!torneo) {
-        return res.status(404).json({ error: 'Torneo no encontrado' });
+        return res.status(404).json({ message: 'Torneo no encontrado' });
       }
       res.status(200).json(torneo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener el torneo' });
+      res.status(500).json({ message: 'Error al obtener el torneo' });
     }
   }
 
@@ -56,14 +56,14 @@ export class torneoController {
 
       const result = validateTorneos(body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const torneo = await torneoModel.create(req.body);
       res.status(201).json(torneo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al crear el torneo' });
+      res.status(500).json({ message: 'Error al crear el torneo' });
     }
   }
 
@@ -72,19 +72,19 @@ export class torneoController {
       const { id } = req.params;
       const result = validatePartialTorneos(req.body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const torneo = await torneoModel.findByPk(id);
       if (!torneo) {
-        return res.status(404).json({ error: 'Torneo no encontrado' });
+        return res.status(404).json({ message: 'Torneo no encontrado' });
       }
 
       await torneo.update(result.data);
       res.status(200).json(torneo);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al actualizar el torneo' });
+      res.status(500).json({ message: 'Error al actualizar el torneo' });
     }
   }
 
@@ -93,14 +93,14 @@ export class torneoController {
       const { id } = req.params;
       const torneo = await torneoModel.findByPk(id);
       if (!torneo) {
-        return res.status(404).json({ error: 'Torneo no encontrado' });
+        return res.status(404).json({ message: 'Torneo no encontrado' });
       }
 
       await torneo.destroy();
       res.status(200).json({ message: 'torneo eliminado' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el torneo' });
+      res.status(500).json({ message: 'Error al eliminar el torneo' });
     }
   }
 }

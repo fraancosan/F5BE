@@ -8,7 +8,7 @@ export class muroController {
       if (titulo) {
         const result = validatePartialMuro({ titulo });
         if (!result.success) {
-          return res.status(400).json({ error: result.error });
+          return res.status(400).json({ message: result.error });
         }
       }
 
@@ -16,12 +16,12 @@ export class muroController {
         where: titulo ? { titulo } : {},
       });
       if (!muros || muros.length === 0) {
-        return res.status(404).json({ error: 'No se encontraron muros' });
+        return res.status(404).json({ message: 'No se encontraron muros' });
       }
       res.status(200).json(muros);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener los muros' });
+      res.status(500).json({ message: 'Error al obtener los muros' });
     }
   }
 
@@ -30,12 +30,12 @@ export class muroController {
       const { id } = req.params;
       const muro = await muroModel.findByPk(id);
       if (!muro) {
-        return res.status(404).json({ error: 'Muro no encontrado' });
+        return res.status(404).json({ message: 'Muro no encontrado' });
       }
       res.status(200).json(muro);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al obtener el muro' });
+      res.status(500).json({ message: 'Error al obtener el muro' });
     }
   }
 
@@ -48,14 +48,14 @@ export class muroController {
 
       const result = validateMuro(body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const newMuro = await muroModel.create(body);
       res.status(201).json(newMuro);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al crear el muro' });
+      res.status(500).json({ message: 'Error al crear el muro' });
     }
   }
 
@@ -74,19 +74,19 @@ export class muroController {
 
       const result = validatePartialMuro(body);
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        return res.status(400).json({ message: result.error });
       }
 
       const muro = await muroModel.findByPk(id);
       if (!muro) {
-        return res.status(404).json({ error: 'Muro no encontrado' });
+        return res.status(404).json({ message: 'Muro no encontrado' });
       }
 
       await muro.update(body);
       res.status(200).json(muro);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al actualizar el muro' });
+      res.status(500).json({ message: 'Error al actualizar el muro' });
     }
   }
 
@@ -97,12 +97,12 @@ export class muroController {
         where: { id },
       });
       if (!deleted) {
-        return res.status(404).json({ error: 'Muro no encontrado' });
+        return res.status(404).json({ message: 'Muro no encontrado' });
       }
       res.status(200).json({ message: 'Muro eliminado' });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el muro' });
+      res.status(500).json({ message: 'Error al eliminar el muro' });
     }
   }
 }
