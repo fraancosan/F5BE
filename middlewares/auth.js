@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import usuarioModel from '../models/Usuario.js';
+import crypto from 'crypto';
 
 export async function authAdmin(req, res, next) {
   try {
@@ -64,5 +65,27 @@ function validateToken(token) {
     return jwt.verify(token, process.env.JWT_PASSWORD);
   } catch (error) {
     res.status(401).json({ message: 'Token invalido' });
+  }
+}
+
+export async function authMercadoPagoWebhook(req, res, next) {
+  try {
+    const xSignature = req.headers['x-signature'];
+    const ts = xSignature.split(',')[0].split('=')[1];
+    const hash = xSignature.split(',')[1].split('=')[1];
+    const xRequestId = req.headers['x-request-id'];
+    const id = req.query['data.id'];
+    const template = `id:${id};request-id:${xRequestId};ts:${ts};`;
+    const cyphedSignature = crypto
+      .createHmac('sha256', process.env.MP_WEBHOOK_SECRET)
+      .update(template)
+      .digest('hex');
+    if (cyphedSignature !== hash) {
+      res.status(401).json({ message: 'Acceso denegado' });
+    } else {
+      next();
+    }
+  } catch (error) {
+    res.status(401).json({ message: 'Acceso denegado' });
   }
 }
