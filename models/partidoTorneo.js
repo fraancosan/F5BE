@@ -51,4 +51,19 @@ const partidoTorneoModel = db.define(
   },
 );
 
+partidoTorneoModel.belongsTo(equipoModel, {
+  foreignKey: 'idEquipo1',
+  as: 'Equipo1',
+});
+partidoTorneoModel.belongsTo(equipoModel, {
+  foreignKey: 'idEquipo2',
+  as: 'Equipo2',
+});
+
+// Asociación entre PartidosTorneo y Torneos
+partidoTorneoModel.belongsTo(torneoModel, {
+  foreignKey: 'idTorneo',
+  as: 'Torneo',
+});
+
 export default partidoTorneoModel;
