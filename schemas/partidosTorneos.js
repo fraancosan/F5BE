@@ -14,3 +14,7 @@ const partidosTorneosSchema = z.object({
 export function validatePartidosTorneos(data) {
   return partidosTorneosSchema.safeParse(data);
 }
+
+export function validatePartialPartidosTorneos(data) {
+  return partidosTorneosSchema.partial().safeParse(data);
+}
