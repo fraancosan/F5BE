@@ -40,4 +40,14 @@ const equipoUsuarioModel = db.define(
   },
 );
 
+equipoUsuarioModel.belongsTo(equipoModel, {
+  foreignKey: 'idEquipo',
+  as: 'Equipo',
+});
+
+equipoUsuarioModel.belongsTo(usuarioModel, {
+  foreignKey: 'idUsuario',
+  as: 'Usuario',
+});
+
 export default equipoUsuarioModel;
