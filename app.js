@@ -7,6 +7,7 @@ import { muroRouter } from './routes/muro.js';
 import { canchaRouter } from './routes/cancha.js';
 import { usuarioRouter } from './routes/usuario.js';
 import { partidoTorneoRouter } from './routes/partidoTorneo.js';
+import { equipoUsuarioRouter } from './routes/equipoUsuario.js';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/muros', muroRouter);
 app.use('/canchas', canchaRouter);
 app.use('/usuarios', usuarioRouter);
 app.use('/partidos', partidoTorneoRouter);
+app.use('/equiposUsuarios', equipoUsuarioRouter);
 app.get('/', (_, res) => {
   res.status(404).json({ error: 'Recurso no encontrado' });
 });
