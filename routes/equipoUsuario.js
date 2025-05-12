@@ -6,3 +6,5 @@ export const equipoUsuarioRouter = Router();
 equipoUsuarioRouter.get('/', equipoUsuarioController.getAll);
 
 equipoUsuarioRouter.get('/:id', equipoUsuarioController.getById);
+
+equipoUsuarioRouter.post('/', equipoUsuarioController.create);
