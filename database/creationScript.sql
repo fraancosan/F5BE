@@ -82,7 +82,8 @@ CREATE TABLE EquiposUsuarios (
     capitan TINYINT(1) NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT FK_EquiposUsuariosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id),
-    CONSTRAINT FK_EquiposUsuariosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id)
+    CONSTRAINT FK_EquiposUsuariosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id),
+    CONSTRAINT unique_equipo_usuario UNIQUE (idEquipo, idUsuario)
 );
 
 CREATE TABLE PartidosTorneo (

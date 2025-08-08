@@ -11,3 +11,7 @@ const equiposUsuariosSchema = z.object({
 export function validateEquiposUsuarios(data) {
   return equiposUsuariosSchema.safeParse(data);
 }
+
+export function validatePartialEquiposUsuarios(data) {
+  return equiposUsuariosSchema.partial().safeParse(data);
+}
