@@ -69,6 +69,7 @@ CREATE TABLE Turnos (
     precio INT NOT NULL,
     buscandoRival TINYINT(1) NOT NULL,
     parrilla TINYINT(1) NOT NULL,
+    fechaCreacion DATETIME NOT NULL,
     idMP VARCHAR(255) DEFAULT NULL,
     idMPCompartido VARCHAR(255) DEFAULT NULL,
     urlPreferenciaPago VARCHAR(255) DEFAULT NULL,

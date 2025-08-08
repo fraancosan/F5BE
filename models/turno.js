@@ -47,7 +47,7 @@ const turnoModel = db.define(
       allowNull: true,
     },
     fecha: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     hora: {
@@ -70,6 +70,11 @@ const turnoModel = db.define(
     parrilla: {
       type: DataTypes.INTEGER(1),
       allowNull: false,
+    },
+    fechaCreacion: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     idMP: {
       type: DataTypes.STRING(255),
