@@ -33,6 +33,20 @@ const turnosSchema = z.object({
     .default(0),
 });
 
+const editableSchema = turnosSchema.pick({
+  fecha: true,
+  hora: true,
+  estado: true,
+  precio: true,
+  buscandoRival: true,
+  parrilla: true,
+  idCancha: true,
+});
+
 export function validateTurnos(data) {
   return turnosSchema.safeParse(data);
+}
+
+export function validatePartialTurnos(data) {
+  return editableSchema.partial().safeParse(data);
 }

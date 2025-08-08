@@ -2,14 +2,25 @@ import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 import canchaModel from './cancha.js';
 import usuarioModel from './Usuario.js';
+import { v4, parse as uuidParse, stringify as uuidStringify } from 'uuid';
 
 const turnoModel = db.define(
   'Turnos',
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BLOB(16),
       primaryKey: true,
+      defaultValue() {
+        return Buffer.from(uuidParse(v4()));
+      },
+      get() {
+        const rawValue = this.getDataValue('id');
+        return rawValue ? uuidStringify(rawValue) : null;
+      },
+      set(value) {
+        const uuid = value || v4(); // si no se pasa, genera uno
+        this.setDataValue('id', Buffer.from(uuidParse(uuid)));
+      },
     },
     idCancha: {
       type: DataTypes.INTEGER,
@@ -59,6 +70,22 @@ const turnoModel = db.define(
     parrilla: {
       type: DataTypes.INTEGER(1),
       allowNull: false,
+    },
+    idMP: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    idMPCompartido: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    urlPreferenciaPago: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    urlPreferenciaPagoCompartido: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
   },
   {
