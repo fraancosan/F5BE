@@ -8,3 +8,5 @@ turnoRouter.get('/', turnoController.getAll);
 turnoRouter.get('/:id', turnoController.getById);
 
 turnoRouter.post('/cancelar/:id', turnoController.cancel);
+
+turnoRouter.patch('/:id', turnoController.update);

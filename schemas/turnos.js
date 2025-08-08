@@ -4,7 +4,12 @@ const turnosSchema = z.object({
   idCancha: z.number().int().positive(),
   idUsuario: z.number().int().positive(),
   idUsuarioCompartido: z.number().int().positive().optional(),
-  fecha: z.date(),
+  fecha: z
+    .string()
+    .regex(
+      /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/,
+      'Invalid date format, expected YYYY-MM-DD',
+    ),
   hora: z
     .string()
     .regex(
