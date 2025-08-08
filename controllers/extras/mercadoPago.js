@@ -12,6 +12,29 @@ const client = new MercadoPagoConfig({
 });
 
 export class mercadoPagoController {
+  /**
+   * It makes a total refund of a payment
+   * @param {string} paymentId The payment id to refund
+   * @returns {number} The status of the refund
+   *  - 200 - The refund was aproved
+   *  - 400 - The refund was rejected (probably because the payment was already refunded)
+   *  - Other - Error
+   */
+  static async totalRefund({ paymentId }) {
+    try {
+      const refund = new PaymentRefund(client);
+      await refund.create({
+        payment_id: paymentId,
+      });
+      // ok
+      return 200;
+    } catch (error) {
+      // 400 - Rejected (probably because the payment was already refunded)
+      // else - Error
+      return error.status;
+    }
+  }
+
   static async webhookPayment(req, res) {
     try {
       const { body } = req;
