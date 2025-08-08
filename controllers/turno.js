@@ -55,20 +55,17 @@ export class turnoController {
           message:
             'No se ha encontrado el turno o el mismo no es apto para cancelarse',
         });
+      } else if (turno.buscandoRival) {
+        return res.status(400).json({
+          message: 'No se puede cancelar un turno compartido',
+        });
       }
+
       const refund = await mercadoPagoController.totalRefund({
         paymentId: turno.idMP,
       });
 
-      let refund2;
-
-      if (turno.idMPCompartido !== null) {
-        refund2 = await mercadoPagoController.totalRefund({
-          paymentId: turno.idMPCompartido,
-        });
-      }
-
-      if (refund === 200 && (refund2 === 200 || refund2 === undefined)) {
+      if (refund === 200) {
         await turnosModel.update(
           { estado: 'cancelado' },
           {
@@ -81,7 +78,7 @@ export class turnoController {
         const error = new Error(
           'El reembolso ya ha sido procesado o ha fallado',
         );
-        error.status = refund || refund2;
+        error.status = refund;
         throw error;
       }
     } catch (error) {
