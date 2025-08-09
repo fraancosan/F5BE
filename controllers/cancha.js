@@ -1,4 +1,4 @@
-import canchaModel from '../models/cancha.js';
+import { canchaModel } from '../models/cancha.js';
 import { validateCanchas } from '../schemas/canchas.js';
 
 export class CanchaController {
