@@ -143,8 +143,9 @@ export class turnoController {
       } else {
         const { id } = req.params;
         let turno = await getById(id);
-        const fecha = result.data.fecha;
-        const hora = result.data.hora;
+        const fecha = result.data.fecha ?? turno.fecha;
+        const hora = result.data.hora ?? turno.hora;
+        const idCancha = result.data.idCancha ?? turno.idCancha;
 
         if (!turno) {
           return res.status(404).json({ message: 'Turno no encontrado' });
@@ -153,13 +154,15 @@ export class turnoController {
             message: 'El turno no se encuentra en estado "señado"',
           });
         } else if (
-          fecha &&
-          hora &&
-          (fecha !== turno.fecha || hora !== turno.hora) &&
-          !(await notOtherTurn(fecha, hora))
+          ((idCancha && idCancha !== turno.idCancha) ||
+            (fecha &&
+              hora &&
+              (fecha !== turno.fecha || hora !== turno.hora))) &&
+          !(await notOtherTurn(fecha, hora, idCancha))
         ) {
           return res.status(400).json({
-            message: 'Ya existe un turno agendado para esa fecha y hora',
+            message:
+              'Ya existe un turno agendado para esa fecha y hora en esa cancha',
           });
         } else {
           turno = await turno.update(result.data);
@@ -173,11 +176,12 @@ export class turnoController {
   }
 }
 
-async function notOtherTurn(fecha, hora) {
+async function notOtherTurn(fecha, hora, idCancha) {
   const result = await turnosModel.findOne({
     where: {
       fecha,
       hora,
+      idCancha,
       estado: 'señado',
     },
   });
