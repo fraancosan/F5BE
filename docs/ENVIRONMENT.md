@@ -27,6 +27,10 @@
 - `MP_URL_FRONTEND_SUCCESS`: This should be the URL of your frontend application that users will be redirected to after a successful payment.
 - `MP_URL_FRONTEND_FAILURE`: This should be the URL of your frontend application that users will be redirected to after a failed payment.
 
+## Others
+
+- `JWT_PASSWORD`: This should be the password for JWT tokens.
+
 ## Example `.env` File
 
 Below is an example of how these variables might look in a `.env` file:
@@ -37,6 +41,8 @@ USER_DB=your_username
 PASSWORD_DB=your_password
 DATABASE_DB=your_database_name
 PORT_DB=3306
+
+JWT_PASSWORD=yourJWTToken
 
 NAME_EMAIL=Your Name
 USER_EMAIL=example@gmail.com
