@@ -17,6 +17,53 @@ export class turnoController {
     }
   }
 
+  static async getAvailableTurnos(req, res) {
+    try {
+      const hoy = new Date();
+      const quincena = new Date(new Date().setDate(new Date().getDate() + 15));
+      // horarios no disponibles
+      const turnos = await turnosModel.findAll({
+        where: {
+          [Op.not]: { estado: 'cancelado' },
+          fecha: {
+            [Op.between]: [hoy, quincena],
+          },
+          hora: {
+            [Op.between]: ['10:00:00', '23:59:59'],
+          },
+        },
+      });
+
+      let allTurnos = [];
+      for (let i = 0; i <= 15; i++) {
+        const fecha = new Date(hoy);
+        fecha.setDate(hoy.getDate() + i);
+        const fechaStr = fecha.toISOString().split('T')[0];
+        let dia = {
+          fecha: fechaStr,
+          horarios: [],
+        };
+
+        for (let hora = 10; hora <= 23; hora++) {
+          const horaStr = `${hora.toString().padStart(2, '0')}:00:00`;
+          const turno = turnos.find(
+            (t) => t.fecha === fechaStr && t.hora === horaStr,
+          );
+
+          dia.horarios.push({
+            disponible: !turno,
+            hora: horaStr,
+          });
+        }
+        allTurnos.push(dia);
+      }
+      res.status(200).json(allTurnos);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener los turnos' });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;

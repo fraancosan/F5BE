@@ -5,6 +5,8 @@ export const turnoRouter = Router();
 
 turnoRouter.get('/', turnoController.getAll);
 
+turnoRouter.get('/disponibles', turnoController.getAvailableTurnos);
+
 turnoRouter.get('/:id', turnoController.getById);
 
 turnoRouter.post('/cancelar/:id', turnoController.cancel);
