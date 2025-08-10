@@ -66,6 +66,11 @@ export class muroController {
       let body = req.body;
       body.fecha = new Date(body.fecha);
       body.fechaFin = new Date(body.fechaFin);
+      if (body.fecha > body.fechaFin) {
+        return res.status(400).json({
+          message: 'La fecha de inicio no puede ser mayor que la fecha de fin',
+        });
+      }
 
       const result = validateMuro(body);
       if (!result.success) {
@@ -101,6 +106,16 @@ export class muroController {
       const muro = await muroModel.findByPk(id);
       if (!muro) {
         return res.status(404).json({ message: 'Muro no encontrado' });
+      }
+
+      // Validación de fechas: asegurar que fecha < fechaFin (new Date solo por Postman)
+      const fechaActualizada = body.fecha || new Date(muro.fecha);
+      const fechaFinActualizada = body.fechaFin || new Date(muro.fechaFin);
+
+      if (fechaActualizada >= fechaFinActualizada) {
+        return res.status(400).json({
+          message: 'La fecha de inicio debe ser menor que la fecha de fin',
+        });
       }
 
       await muro.update(body);
