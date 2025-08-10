@@ -5,6 +5,7 @@ import { Op, literal } from 'sequelize';
 import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
 import { isPremium } from '../models/Usuario.js';
 import politicaModel from '../models/politica.js';
+import db from '../database/connection.js';
 
 export class turnoController {
   static async getAll(req, res) {
@@ -168,6 +169,65 @@ export class turnoController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener el precio del turno' });
+    }
+  }
+
+  static async create(req, res) {
+    const t = await db.transaction();
+    try {
+      const result = validateTurnos(req.body);
+      if (!result.success) {
+        const error = new Error(result.error);
+        error.status = 400;
+        throw error;
+      } else {
+        const body = result.data;
+        body.idUsuario = req.user.id;
+        body.estado = 'señado';
+        const canchas = await getAvailableCanchas(
+          result.data.fecha,
+          result.data.hora,
+        );
+
+        if (canchas.length === 0) {
+          return res.status(409).json({
+            message: 'No hay canchas disponibles',
+          });
+        } else {
+          body.idCancha = canchas[0].id;
+        }
+
+        const pricing = await getPrice({
+          user: req.user,
+          parrilla: result.data.parrilla,
+          compartido: result.data.buscandoRival,
+        });
+
+        body.precio = pricing.precio;
+        body.precioSeña = pricing.precioSeña;
+
+        let turno = await turnosModel.create(body, { transaction: t });
+        const preference = await mercadoPagoController.createPreference({
+          title: `Seña RODO F5 | Día: ${turno.fecha} | Hora: ${turno.hora}`,
+          precio: turno.precioSeña,
+          idReferencia: turno.id,
+        });
+
+        await turno.update(
+          { urlPreferenciaPago: preference.init_point },
+          { transaction: t },
+        );
+        await t.commit();
+        res.status(200).json(turno);
+      }
+    } catch (error) {
+      await t.rollback();
+      if (error.status) {
+        res.status(error.status).json({ message: error.message });
+      } else {
+        console.error(error);
+        res.status(500).json({ message: 'Error al crear el turno' });
+      }
     }
   }
 

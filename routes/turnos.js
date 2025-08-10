@@ -12,6 +12,8 @@ turnoRouter.get('/pre-precio', authUser, turnoController.getPrePrice);
 
 turnoRouter.get('/:id', turnoController.getById);
 
+turnoRouter.post('/', authUser, turnoController.create);
+
 turnoRouter.post('/cancelar/:id', turnoController.cancel);
 
 turnoRouter.patch('/:id', turnoController.update);
