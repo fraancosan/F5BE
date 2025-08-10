@@ -66,9 +66,9 @@ export class muroController {
       let body = req.body;
       body.fecha = new Date(body.fecha);
       body.fechaFin = new Date(body.fechaFin);
-      if (body.fecha > body.fechaFin) {
+      if (body.fecha >= body.fechaFin) {
         return res.status(400).json({
-          message: 'La fecha de inicio no puede ser mayor que la fecha de fin',
+          message: 'La fecha de publicacion debe ser menor que la fecha de fin',
         });
       }
 
@@ -114,7 +114,7 @@ export class muroController {
 
       if (fechaActualizada >= fechaFinActualizada) {
         return res.status(400).json({
-          message: 'La fecha de inicio debe ser menor que la fecha de fin',
+          message: 'La fecha de publicacion debe ser menor que la fecha de fin',
         });
       }
 
