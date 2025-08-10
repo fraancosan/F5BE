@@ -67,6 +67,7 @@ CREATE TABLE Turnos (
     hora TIME NOT NULL,
     estado VARCHAR(20) NOT NULL,
     precio INT NOT NULL,
+    precioSeña INT NOT NULL,
     buscandoRival TINYINT(1) NOT NULL,
     parrilla TINYINT(1) NOT NULL,
     fechaCreacion DATETIME NOT NULL,

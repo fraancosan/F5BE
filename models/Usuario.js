@@ -1,5 +1,6 @@
 import db from '../database/connection.js';
 import { DataTypes, QueryTypes } from 'sequelize';
+import politicaModel from './politica.js';
 
 const usuarioModel = db.define(
   'Usuarios',
@@ -63,7 +64,10 @@ async function isPremium(id) {
         type: QueryTypes.SELECT,
       },
     );
-    return result.total >= 5;
+    const reservasPremium = await politicaModel.findByPk(
+      'reservasNecesariasPremium',
+    );
+    return result.total >= reservasPremium.descripcion;
   } catch (error) {
     return false;
   }

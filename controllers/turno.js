@@ -3,6 +3,8 @@ import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
 import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
+import { isPremium } from '../models/Usuario.js';
+import politicaModel from '../models/politica.js';
 
 export class turnoController {
   static async getAll(req, res) {
@@ -153,6 +155,21 @@ export class turnoController {
       res.status(500).json({ message: 'Error al cancelar el turno' });
     }
   }
+  static async getPrePrice(req, res) {
+    try {
+      let { parrilla, compartido } = req.query;
+
+      const rta = await getPrice({
+        user: req.user,
+        parrilla: parrilla == 1,
+        compartido: compartido == 1,
+      });
+      res.status(200).json(rta);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener el precio del turno' });
+    }
+  }
 
   static async update(req, res) {
     try {
@@ -217,4 +234,42 @@ async function getById(id) {
     replacements: [id],
   });
   return result;
+}
+
+async function getPrice({ user, parrilla, compartido }) {
+  const politicas = await politicaModel.findAll({
+    where: {
+      nombre: [
+        'precioTurno',
+        'porcentajeSeña',
+        'precioParrilla',
+        'descuentoPremium',
+      ],
+    },
+  });
+
+  const getValor = (nombre) =>
+    parseFloat(politicas.find((p) => p.nombre === nombre)?.descripcion || 0);
+
+  let precio = getValor('precioTurno');
+
+  if (parrilla) {
+    precio += getValor('precioParrilla');
+  }
+
+  if (compartido) {
+    precio /= 2;
+  } else {
+    const premium = await isPremium(user.id);
+    if (premium) {
+      precio *= 1 - getValor('descuentoPremium');
+    }
+  }
+
+  const precioSeña = precio * getValor('porcentajeSeña');
+
+  return {
+    precio,
+    precioSeña,
+  };
 }

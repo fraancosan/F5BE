@@ -58,8 +58,11 @@ const turnoModel = db.define(
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-
     precio: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    precioSeña: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
