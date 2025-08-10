@@ -6,8 +6,10 @@ import { politicaRouter } from './routes/politica.js';
 import { muroRouter } from './routes/muro.js';
 import { canchaRouter } from './routes/cancha.js';
 import { usuarioRouter } from './routes/usuario.js';
+import { mercadoPagoRouter } from './routes/extras/mercadoPago.js';
 import { partidoTorneoRouter } from './routes/partidoTorneo.js';
 import { equipoUsuarioRouter } from './routes/equipoUsuario.js';
+import { turnoRouter } from './routes/turnos.js';
 
 const app = express();
 
@@ -25,6 +27,12 @@ app.use('/canchas', canchaRouter);
 app.use('/usuarios', usuarioRouter);
 app.use('/partidos', partidoTorneoRouter);
 app.use('/equiposUsuarios', equipoUsuarioRouter);
+app.use('/turnos', turnoRouter);
+
+// extras
+app.use('/mercadopago', mercadoPagoRouter);
+
+// default
 app.get('/', (_, res) => {
   res.status(404).json({ error: 'Recurso no encontrado' });
 });

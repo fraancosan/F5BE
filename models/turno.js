@@ -1,15 +1,26 @@
 import db from '../database/connection.js';
-import { DataTypes } from 'sequelize';
-import canchaModel from './cancha.js';
-import usuarioModel from './Usuario.js';
+import { DataTypes, QueryTypes } from 'sequelize';
+import { canchaModel } from './cancha.js';
+import { usuarioModel } from './Usuario.js';
+import { v4, parse as uuidParse, stringify as uuidStringify } from 'uuid';
 
-const turnoModel = db.define(
+const turnosModel = db.define(
   'Turnos',
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.BLOB(16),
       primaryKey: true,
+      defaultValue() {
+        return Buffer.from(uuidParse(v4()));
+      },
+      get() {
+        const rawValue = this.getDataValue('id');
+        return rawValue ? uuidStringify(rawValue) : null;
+      },
+      set(value) {
+        const uuid = value || v4(); // si no se pasa, genera uno
+        this.setDataValue('id', Buffer.from(uuidParse(uuid)));
+      },
     },
     idCancha: {
       type: DataTypes.INTEGER,
@@ -36,7 +47,7 @@ const turnoModel = db.define(
       allowNull: true,
     },
     fecha: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     hora: {
@@ -47,8 +58,11 @@ const turnoModel = db.define(
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-
     precio: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    precioSeña: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -60,6 +74,27 @@ const turnoModel = db.define(
       type: DataTypes.INTEGER(1),
       allowNull: false,
     },
+    fechaCreacion: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    idMP: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    idMPCompartido: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    urlPreferenciaPago: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    urlPreferenciaPagoCompartido: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
   },
   {
     tableName: 'Turnos',
@@ -68,4 +103,23 @@ const turnoModel = db.define(
   },
 );
 
-export default turnoModel;
+async function updateIdMP({ id, idMP }) {
+  try {
+    await db.query(
+      `
+      UPDATE Turnos
+      SET idMP = ?
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      {
+        replacements: [idMP, id],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    error.status = 500;
+    throw error;
+  }
+}
+
+export { turnosModel, updateIdMP };

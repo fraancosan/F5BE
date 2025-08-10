@@ -1,5 +1,6 @@
 import db from '../database/connection.js';
-import { DataTypes } from 'sequelize';
+import { DataTypes, QueryTypes } from 'sequelize';
+import politicaModel from './politica.js';
 
 const usuarioModel = db.define(
   'Usuarios',
@@ -42,4 +43,34 @@ const usuarioModel = db.define(
   },
 );
 
-export default usuarioModel;
+async function isPremium(id) {
+  try {
+    const [result] = await db.query(
+      `
+      SELECT COUNT(*) AS Total 
+      FROM Usuarios u
+      JOIN Turnos t ON ( 
+        u.id = t.idUsuario 
+        OR 
+        u.id = t.idUsuarioCompartido
+      )
+      WHERE 
+        t.estado = 'finalizado' 
+        AND t.fecha >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        AND u.id = UUID_TO_BIN(?)
+      `,
+      {
+        replacements: [id],
+        type: QueryTypes.SELECT,
+      },
+    );
+    const reservasPremium = await politicaModel.findByPk(
+      'reservasNecesariasPremium',
+    );
+    return result.total >= reservasPremium.descripcion;
+  } catch (error) {
+    return false;
+  }
+}
+
+export { usuarioModel, isPremium };

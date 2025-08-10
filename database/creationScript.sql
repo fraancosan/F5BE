@@ -59,7 +59,7 @@ CREATE TABLE Politicas (
 );
 
 CREATE TABLE Turnos (
-    id INT AUTO_INCREMENT NOT NULL,
+    id BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID())),
     idCancha INT NOT NULL,
     idUsuario INT NOT NULL,
     idUsuarioCompartido INT NULL,
@@ -67,8 +67,14 @@ CREATE TABLE Turnos (
     hora TIME NOT NULL,
     estado VARCHAR(20) NOT NULL,
     precio INT NOT NULL,
+    precioSeña INT NOT NULL,
     buscandoRival TINYINT(1) NOT NULL,
     parrilla TINYINT(1) NOT NULL,
+    fechaCreacion DATETIME NOT NULL,
+    idMP VARCHAR(255) DEFAULT NULL,
+    idMPCompartido VARCHAR(255) DEFAULT NULL,
+    urlPreferenciaPago VARCHAR(255) DEFAULT NULL,
+    urlPreferenciaPagoCompartido VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
     CONSTRAINT FK_TurnosCanchas FOREIGN KEY (idCancha) REFERENCES Canchas(id),
     CONSTRAINT FK_TurnosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id),
