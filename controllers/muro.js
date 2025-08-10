@@ -1,5 +1,6 @@
 import muroModel from '../models/muro.js';
 import { validateMuro, validatePartialMuro } from '../schemas/muro.js';
+import { Op } from 'sequelize';
 
 export class muroController {
   static async getAll(req, res) {
@@ -14,6 +15,26 @@ export class muroController {
 
       const muros = await muroModel.findAll({
         where: titulo ? { titulo } : {},
+      });
+      if (!muros || muros.length === 0) {
+        return res.status(404).json({ message: 'No se encontraron muros' });
+      }
+      res.status(200).json(muros);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener los muros' });
+    }
+  }
+
+  static async getAllCurrent(req, res) {
+    try {
+      const fechaActual = new Date();
+      const muros = await muroModel.findAll({
+        where: {
+          fechaFin: {
+            [Op.gt]: fechaActual,
+          },
+        },
       });
       if (!muros || muros.length === 0) {
         return res.status(404).json({ message: 'No se encontraron muros' });

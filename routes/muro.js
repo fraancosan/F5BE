@@ -5,6 +5,8 @@ export const muroRouter = Router();
 
 muroRouter.get('/', muroController.getAll);
 
+muroRouter.get('/vigente', muroController.getAllCurrent);
+
 muroRouter.get('/:id', muroController.getById);
 
 muroRouter.post('/', muroController.create);
