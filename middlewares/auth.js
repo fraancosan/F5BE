@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import usuarioModel from '../models/Usuario.js';
+import { usuarioModel } from '../models/Usuario.js';
 import crypto from 'crypto';
 
 export async function authAdmin(req, res, next) {

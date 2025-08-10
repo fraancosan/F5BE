@@ -1,7 +1,7 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
 import { canchaModel } from './cancha.js';
-import usuarioModel from './Usuario.js';
+import { usuarioModel } from './Usuario.js';
 import { v4, parse as uuidParse, stringify as uuidStringify } from 'uuid';
 
 const turnoModel = db.define(

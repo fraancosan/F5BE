@@ -1,4 +1,4 @@
-import usuarioModel from '../models/Usuario.js';
+import { usuarioModel } from '../models/Usuario.js';
 import {
   validateUsuarios,
   validatePartialUsuarios,

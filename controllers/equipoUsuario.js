@@ -1,6 +1,6 @@
 import equipoUsuarioModel from '../models/equipoUsuario.js';
 import equipoModel from '../models/equipo.js';
-import usuarioModel from '../models/Usuario.js';
+import { usuarioModel } from '../models/Usuario.js';
 import { Op } from 'sequelize';
 import {
   validateEquiposUsuarios,
