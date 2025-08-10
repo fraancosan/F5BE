@@ -2,6 +2,7 @@ import turnosModel from '../models/turno.js';
 import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
+import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
 
 export class turnoController {
   static async getAll(req, res) {
@@ -19,45 +20,67 @@ export class turnoController {
 
   static async getAvailableTurnos(req, res) {
     try {
-      const hoy = new Date();
-      const quincena = new Date(new Date().setDate(new Date().getDate() + 15));
-      // horarios no disponibles
-      const turnos = await turnosModel.findAll({
+      const canchas = await canchaModel.findAll({
         where: {
-          [Op.not]: { estado: 'cancelado' },
-          fecha: {
-            [Op.between]: [hoy, quincena],
-          },
-          hora: {
-            [Op.between]: ['10:00:00', '23:59:59'],
-          },
+          disponible: 1,
         },
       });
+      if (canchas.length === 0) {
+        return res.status(409).json({
+          message: 'No hay canchas disponibles',
+        });
+      } else {
+        const hoy = new Date();
+        const quincena = new Date(
+          new Date().setDate(new Date().getDate() + 15),
+        );
+        // horarios no disponibles
+        const turnos = await turnosModel.findAll({
+          where: {
+            [Op.not]: { estado: 'cancelado' },
+            fecha: {
+              [Op.between]: [hoy, quincena],
+            },
+            hora: {
+              [Op.between]: ['10:00:00', '23:59:59'],
+            },
+          },
+        });
 
-      let allTurnos = [];
-      for (let i = 0; i <= 15; i++) {
-        const fecha = new Date(hoy);
-        fecha.setDate(hoy.getDate() + i);
-        const fechaStr = fecha.toISOString().split('T')[0];
-        let dia = {
-          fecha: fechaStr,
-          horarios: [],
-        };
+        let allTurnos = [];
+        for (let i = 0; i <= 15; i++) {
+          const fecha = new Date(hoy);
+          fecha.setDate(hoy.getDate() + i);
+          const fechaStr = fecha.toISOString().split('T')[0];
+          let dia = {
+            fecha: fechaStr,
+            horarios: [],
+          };
 
-        for (let hora = 10; hora <= 23; hora++) {
-          const horaStr = `${hora.toString().padStart(2, '0')}:00:00`;
-          const turno = turnos.find(
-            (t) => t.fecha === fechaStr && t.hora === horaStr,
-          );
+          for (let hora = 10; hora <= 23; hora++) {
+            const horaStr = `${hora.toString().padStart(2, '0')}:00:00`;
+            const turnosFiltrados = turnos.filter(
+              (t) => t.fecha === fechaStr && t.hora === horaStr,
+            );
 
-          dia.horarios.push({
-            disponible: !turno,
-            hora: horaStr,
-          });
+            let disponible;
+            if (turnosFiltrados.length > 0) {
+              const idOcupados = turnosFiltrados.map((t) => t.idCancha);
+              // Hay alguna cancha libre?
+              disponible = canchas.some((c) => !idOcupados.includes(c.id));
+            } else {
+              disponible = true;
+            }
+
+            dia.horarios.push({
+              disponible,
+              hora: horaStr,
+            });
+          }
+          allTurnos.push(dia);
         }
-        allTurnos.push(dia);
+        res.status(200).json(allTurnos);
       }
-      res.status(200).json(allTurnos);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener los turnos' });
