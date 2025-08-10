@@ -4,7 +4,7 @@ import { authMercadoPagoWebhook } from '../../middlewares/auth.js';
 export const mercadoPagoRouter = Router();
 
 mercadoPagoRouter.post(
-  '/webhook',
+  '/webhook/:endPoint',
   authMercadoPagoWebhook,
   mercadoPagoController.webhookPayment,
 );

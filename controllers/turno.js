@@ -1,4 +1,4 @@
-import turnosModel from '../models/turno.js';
+import { turnosModel } from '../models/turno.js';
 import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
@@ -211,6 +211,7 @@ export class turnoController {
           title: `Seña RODO F5 | Día: ${turno.fecha} | Hora: ${turno.hora}`,
           precio: turno.precioSeña,
           idReferencia: turno.id,
+          endPoint: 'turno',
         });
 
         await turno.update(

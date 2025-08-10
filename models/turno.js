@@ -1,10 +1,10 @@
 import db from '../database/connection.js';
-import { DataTypes } from 'sequelize';
+import { DataTypes, QueryTypes } from 'sequelize';
 import { canchaModel } from './cancha.js';
 import { usuarioModel } from './Usuario.js';
 import { v4, parse as uuidParse, stringify as uuidStringify } from 'uuid';
 
-const turnoModel = db.define(
+const turnosModel = db.define(
   'Turnos',
   {
     id: {
@@ -103,4 +103,23 @@ const turnoModel = db.define(
   },
 );
 
-export default turnoModel;
+async function updateIdMP({ id, idMP }) {
+  try {
+    await db.query(
+      `
+      UPDATE Turnos
+      SET idMP = ?
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      {
+        replacements: [idMP, id],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    error.status = 500;
+    throw error;
+  }
+}
+
+export { turnosModel, updateIdMP };

@@ -5,6 +5,7 @@ import {
   PaymentRefund,
 } from 'mercadopago';
 import 'dotenv/config';
+import { updateIdMP } from '../../models/turno.js';
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -21,14 +22,19 @@ export class mercadoPagoController {
    * @returns {Object} Preferencia de pago de MercadoPago
    * @throws {Error} Si ocurre un error al contactar con MercadoPago
    */
-  static async createPreference({ title, precio, idReferencia }) {
+  static async createPreference({
+    title,
+    precio,
+    idReferencia,
+    endPoint = '',
+  }) {
     try {
       const now = new Date();
       const twentyMinutesLater = new Date(now.getTime() + 20 * 60 * 1000);
       const items = [
         {
           id: idReferencia,
-          title: title,
+          title,
           quantity: 1,
           unit_price: precio,
           currency_id: 'ARS',
@@ -38,11 +44,11 @@ export class mercadoPagoController {
       const body = {
         items,
         back_urls: {
-          success: process.env.URL_FRONTEND_MP_SUCCESS + '/' + idReferencia,
-          failure: process.env.URL_FRONTEND_MP_FAILURE,
-          pending: process.env.URL_FRONTEND_MP_FAILURE,
+          success: process.env.MP_URL_FRONTEND_SUCCESS + '/' + idReferencia,
+          failure: process.env.MP_URL_FRONTEND_FAILURE,
+          pending: process.env.MP_URL_FRONTEND_FAILURE,
         },
-        notification_url: process.env.URL_BACKEND_MP,
+        notification_url: process.env.MP_URL_BACKEND + '/' + endPoint,
         auto_return: 'approved',
         purpose: 'wallet_purchase',
         statement_descriptor: 'RODO',
@@ -86,21 +92,31 @@ export class mercadoPagoController {
   static async webhookPayment(req, res) {
     try {
       const { body } = req;
+      const { endPoint } = req.params;
+
       // body.data.id = 123456; // Just for testing
       if (body.type === 'payment' && body.data.id != 123456) {
         const payment = await new Payment(client).get({ id: body.data.id });
         if (payment.status === 'approved') {
-          const dataToSend = {
-            idPedido: payment.external_reference,
-            fechaPago: new Date(payment.date_approved),
+          // el id es seguro, no hace falta sanitizar
+          const datos = {
+            id: payment.external_reference,
             idMP: payment.id,
           };
-          // need to save the payment in the database and update the order status
+          if (endPoint === 'turno') {
+            await updateIdMP(datos);
+          } else {
+            res.status(404).json({
+              message: 'EndPoint no especificado',
+            });
+          }
         }
       }
       res.status(200).send();
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const status = error.status ?? 400;
+      console.error(error);
+      res.status(status).json({ message: error.message });
     }
   }
 }
