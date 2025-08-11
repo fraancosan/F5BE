@@ -90,7 +90,6 @@ export class muroController {
       const { id } = req.params;
       // Parseo de las fechas a tipo Date (SOLO POR TESTEO EN POSTMAN)
       let body = req.body;
-      console.log(body);
       if (body.fecha) {
         body.fecha = new Date(body.fecha);
       }
