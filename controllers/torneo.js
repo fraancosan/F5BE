@@ -1,5 +1,6 @@
 import torneoModel from '../models/torneo.js';
 import equipoModel from '../models/equipo.js';
+import { Op } from 'sequelize';
 import { validateTorneos, validatePartialTorneos } from '../schemas/torneos.js';
 
 export class torneoController {
@@ -59,6 +60,48 @@ export class torneoController {
         return res.status(400).json({ message: result.error });
       }
 
+      if (body.fechaInicio > body.fechaFin) {
+        return res.status(400).json({
+          message: 'La fecha de inicio debe ser menor que la fecha de fin',
+        });
+      }
+
+      // Verificar que no existan torneos con fechas coincidentes
+      const torneosExistentes = await torneoModel.findAll({
+        where: {
+          [Op.or]: [
+            // El nuevo torneo empieza durante otro torneo existente
+            {
+              [Op.and]: [
+                { fechaInicio: { [Op.lte]: body.fechaInicio } },
+                { fechaFin: { [Op.gte]: body.fechaInicio } },
+              ],
+            },
+            // El nuevo torneo termina durante otro torneo existente
+            {
+              [Op.and]: [
+                { fechaInicio: { [Op.lte]: body.fechaFin } },
+                { fechaFin: { [Op.gte]: body.fechaFin } },
+              ],
+            },
+            // El nuevo torneo envuelve completamente a otro torneo existente
+            {
+              [Op.and]: [
+                { fechaInicio: { [Op.gte]: body.fechaInicio } },
+                { fechaFin: { [Op.lte]: body.fechaFin } },
+              ],
+            },
+          ],
+        },
+      });
+
+      if (torneosExistentes.length > 0) {
+        return res.status(400).json({
+          message:
+            'Ya existe un torneo con fechas que coinciden con las fechas seleccionadas',
+        });
+      }
+
       const torneo = await torneoModel.create(req.body);
       res.status(201).json(torneo);
     } catch (error) {
@@ -70,7 +113,15 @@ export class torneoController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const result = validatePartialTorneos(req.body);
+      let body = req.body;
+      if (body.fechaInicio) {
+        body.fechaInicio = new Date(body.fechaInicio);
+      }
+      if (body.fechaFin) {
+        body.fechaFin = new Date(body.fechaFin);
+      }
+
+      const result = validatePartialTorneos(body);
       if (!result.success) {
         return res.status(400).json({ message: result.error });
       }
@@ -78,6 +129,55 @@ export class torneoController {
       const torneo = await torneoModel.findByPk(id);
       if (!torneo) {
         return res.status(404).json({ message: 'Torneo no encontrado' });
+      }
+
+      // Si se están actualizando las fechas, verificar que no coincidan con otros torneos
+      if (body.fechaInicio || body.fechaFin) {
+        const fechaInicio = body.fechaInicio || torneo.fechaInicio;
+        const fechaFin = body.fechaFin || torneo.fechaFin;
+
+        if (fechaInicio > fechaFin) {
+          return res.status(400).json({
+            message: 'La fecha de inicio debe ser menor que la fecha de fin',
+          });
+        }
+
+        // Verificar que no existan otros torneos con fechas coincidentes (excluyendo el actual)
+        const torneosExistentes = await torneoModel.findAll({
+          where: {
+            id: { [Op.ne]: id },
+            [Op.or]: [
+              // El torneo actualizado empieza durante otro torneo existente
+              {
+                [Op.and]: [
+                  { fechaInicio: { [Op.lte]: fechaInicio } },
+                  { fechaFin: { [Op.gte]: fechaInicio } },
+                ],
+              },
+              // El torneo actualizado termina durante otro torneo existente
+              {
+                [Op.and]: [
+                  { fechaInicio: { [Op.lte]: fechaFin } },
+                  { fechaFin: { [Op.gte]: fechaFin } },
+                ],
+              },
+              // El torneo actualizado envuelve completamente a otro torneo existente
+              {
+                [Op.and]: [
+                  { fechaInicio: { [Op.gte]: fechaInicio } },
+                  { fechaFin: { [Op.lte]: fechaFin } },
+                ],
+              },
+            ],
+          },
+        });
+
+        if (torneosExistentes.length > 0) {
+          return res.status(400).json({
+            message:
+              'Las fechas actualizadas coinciden con las fechas de otro torneo existente',
+          });
+        }
       }
 
       await torneo.update(result.data);
