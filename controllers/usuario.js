@@ -3,6 +3,8 @@ import {
   validateUsuarios,
   validatePartialUsuarios,
 } from '../schemas/usuarios.js';
+import politicaModel from '../models/politica.js';
+import db from '../database/connection.js';
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -40,6 +42,57 @@ export class UsuarioController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener el usuario' });
+    }
+  }
+
+  static async getUserPremium(req, res) {
+    try {
+      const reservasPremium = await politicaModel.findByPk(
+        'reservasNecesariasPremium',
+      );
+      if (!reservasPremium) {
+        return res.status(500).json({
+          message: 'Error al obtener la política de usuarios premium',
+        });
+      }
+      const reservasNecesarias = parseInt(reservasPremium.descripcion);
+      const usuariosPremium = await db.query(
+        `
+      SELECT 
+        u.id,
+        u.nombre,
+        u.apellido,
+        u.mail,
+        u.telefono,
+        u.rol,
+        COUNT(*) AS totalReservas
+      FROM Usuarios u
+      JOIN Turnos t ON ( 
+        u.id = t.idUsuario 
+        OR 
+        u.id = t.idUsuarioCompartido
+      )
+      WHERE 
+        t.estado = 'finalizado' 
+        AND t.fecha >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+      GROUP BY u.id, u.nombre, u.apellido, u.mail, u.telefono, u.rol
+      HAVING COUNT(*) >= ?
+      ORDER BY u.nombre ASC
+      `,
+        {
+          replacements: [reservasNecesarias],
+          type: QueryTypes.SELECT,
+        },
+      );
+      if (usuariosPremium.length === 0) {
+        return res
+          .status(404)
+          .json({ message: 'No se encontraron usuarios premium' });
+      }
+      res.status(200).json(usuariosPremium);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al listar los usuarios premium' });
     }
   }
 

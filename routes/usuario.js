@@ -7,6 +7,8 @@ usuarioRouter.get('/', UsuarioController.getAll);
 
 usuarioRouter.get('/:id', UsuarioController.getById);
 
+usuarioRouter.get('/premium', UsuarioController.getUserPremium);
+
 usuarioRouter.post('/', UsuarioController.create);
 
 usuarioRouter.patch('/:id', UsuarioController.update);
