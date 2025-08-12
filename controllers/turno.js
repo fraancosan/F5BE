@@ -54,7 +54,14 @@ export class turnoController {
         for (let i = 0; i <= 15; i++) {
           const fecha = new Date(hoy);
           fecha.setDate(hoy.getDate() + i);
-          const fechaStr = fecha.toISOString().split('T')[0];
+
+          const fechaStr =
+            hoy.getFullYear() +
+            '-' +
+            String(hoy.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(hoy.getDate()).padStart(2, '0');
+
           const horaActual = i === 0 ? new Date().getHours() : -1; // Solo obtener hora actual si es hoy
           let dia = {
             fecha: fechaStr,
