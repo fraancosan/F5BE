@@ -8,6 +8,8 @@ turnoRouter.get('/', turnoController.getAll);
 
 turnoRouter.get('/disponibles', turnoController.getAvailableTurnos);
 
+turnoRouter.get('/buscar-rival', authUser, turnoController.getBuscarRival);
+
 turnoRouter.get('/pre-precio', authUser, turnoController.getPrePrice);
 
 turnoRouter.get('/:id', turnoController.getById);

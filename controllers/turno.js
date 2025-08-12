@@ -21,6 +21,47 @@ export class turnoController {
     }
   }
 
+  static async getBuscarRival(req, res) {
+    try {
+      const hoy = new Date();
+      const fechaHoy =
+        hoy.getFullYear() +
+        '-' +
+        String(hoy.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(hoy.getDate()).padStart(2, '0');
+      const horaActual = new Date().getHours() + ':00:00';
+
+      const turnos = await turnosModel.findAll({
+        where: {
+          buscandoRival: true,
+          idUsuarioCompartido: null,
+          [Op.not]: { idUsuario: req.user.id }, // Excluir turnos del usuario actual
+          [Op.or]: [
+            {
+              fecha: { [Op.gt]: fechaHoy }, // fechas futuras, cualquier hora
+            },
+            {
+              fecha: fechaHoy,
+              hora: { [Op.gt]: horaActual }, // hoy, hora mayor a ahora
+            },
+          ],
+        },
+        order: [
+          ['fecha', 'ASC'],
+          ['hora', 'ASC'],
+        ],
+      });
+      if (turnos.length === 0) {
+        return res.status(404).json({ message: 'No se encontraron turnos' });
+      }
+      res.status(200).json(turnos);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener los turnos' });
+    }
+  }
+
   static async getAvailableTurnos(req, res) {
     try {
       const canchas = await canchaModel.findAll({
