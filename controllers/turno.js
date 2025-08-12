@@ -55,6 +55,7 @@ export class turnoController {
           const fecha = new Date(hoy);
           fecha.setDate(hoy.getDate() + i);
           const fechaStr = fecha.toISOString().split('T')[0];
+          const horaActual = i === 0 ? new Date().getHours() : -1; // Solo obtener hora actual si es hoy
           let dia = {
             fecha: fechaStr,
             horarios: [],
@@ -67,7 +68,10 @@ export class turnoController {
             );
 
             let disponible;
-            if (turnosFiltrados.length > 0) {
+            // Si es hoy y la hora ya pasó, marcar como no disponible
+            if (i === 0 && hora <= horaActual) {
+              disponible = false;
+            } else if (turnosFiltrados.length > 0) {
               const idOcupados = turnosFiltrados.map((t) => t.idCancha);
               // Hay alguna cancha libre?
               disponible = canchas.some((c) => !idOcupados.includes(c.id));
