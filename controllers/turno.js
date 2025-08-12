@@ -3,7 +3,7 @@ import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
 import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
-import { isPremium } from '../models/Usuario.js';
+import { isPremium, usuarioModel } from '../models/Usuario.js';
 import politicaModel from '../models/politica.js';
 import db from '../database/connection.js';
 
@@ -50,6 +50,13 @@ export class turnoController {
         order: [
           ['fecha', 'ASC'],
           ['hora', 'ASC'],
+        ],
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario',
+            attributes: ['nombre'],
+          },
         ],
       });
       if (turnos.length === 0) {
