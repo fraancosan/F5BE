@@ -16,6 +16,8 @@ turnoRouter.get('/:id', turnoController.getById);
 
 turnoRouter.post('/', authUser, turnoController.create);
 
+turnoRouter.post('/unirse-turno/:id', authUser, turnoController.unirseTurno);
+
 turnoRouter.post('/cancelar/:id', turnoController.cancel);
 
 turnoRouter.patch('/:id', turnoController.update);

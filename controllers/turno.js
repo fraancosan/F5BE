@@ -291,6 +291,41 @@ export class turnoController {
     }
   }
 
+  static async unirseTurno(req, res) {
+    try {
+      const { id } = req.params;
+      const idUsuarioCompartido = req.user.id;
+
+      const turno = await getById(id);
+      if (!turno) {
+        return res.status(404).json({ message: 'Turno no encontrado' });
+      } else if (turno.estado !== 'señado') {
+        return res.status(400).json({
+          message: 'El turno no se encuentra en estado "señado"',
+        });
+      } else if (!turno.buscandoRival || turno.idUsuarioCompartido) {
+        return res.status(400).json({
+          message: 'El turno no está disponible para unirse',
+        });
+      } else {
+        const preference = await mercadoPagoController.createPreference({
+          title: `Seña RODO F5 | Día: ${turno.fecha} | Hora: ${turno.hora}`,
+          precio: turno.precioSeña,
+          idReferencia: `${turno.id}-compartido`,
+          endPoint: 'turno-compartido',
+        });
+        await turno.update({
+          urlPreferenciaPagoCompartido: preference.init_point,
+          idUsuarioCompartido,
+        });
+        res.status(200).json(turno);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al unirse al turno' });
+    }
+  }
+
   static async update(req, res) {
     try {
       const result = validatePartialTurnos(req.body);
