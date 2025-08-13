@@ -5,7 +5,7 @@ import {
   PaymentRefund,
 } from 'mercadopago';
 import 'dotenv/config';
-import { updateIdMP } from '../../models/turno.js';
+import { updateIdMP, updateIdMPCompartido } from '../../models/turno.js';
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -93,7 +93,6 @@ export class mercadoPagoController {
     try {
       const { body } = req;
       const { endPoint } = req.params;
-
       // body.data.id = 123456; // Just for testing
       if (body.type === 'payment' && body.data.id != 123456) {
         const payment = await new Payment(client).get({ id: body.data.id });
@@ -105,6 +104,9 @@ export class mercadoPagoController {
           };
           if (endPoint === 'turno') {
             await updateIdMP(datos);
+          } else if (endPoint === 'turno-compartido') {
+            datos.id = datos.id.replace('-compartido', '');
+            await updateIdMPCompartido(datos);
           } else {
             res.status(404).json({
               message: 'EndPoint no especificado',

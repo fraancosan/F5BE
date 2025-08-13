@@ -3,7 +3,7 @@ import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
 import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
-import { isPremium } from '../models/Usuario.js';
+import { isPremium, usuarioModel } from '../models/Usuario.js';
 import politicaModel from '../models/politica.js';
 import db from '../database/connection.js';
 
@@ -11,6 +11,56 @@ export class turnoController {
   static async getAll(req, res) {
     try {
       const turnos = await turnosModel.findAll();
+      if (turnos.length === 0) {
+        return res.status(404).json({ message: 'No se encontraron turnos' });
+      }
+      res.status(200).json(turnos);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener los turnos' });
+    }
+  }
+
+  static async getBuscarRival(req, res) {
+    try {
+      const hoy = new Date();
+      const fechaHoy =
+        hoy.getFullYear() +
+        '-' +
+        String(hoy.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(hoy.getDate()).padStart(2, '0');
+      const horaActual = new Date().getHours() + ':00:00';
+
+      const turnos = await turnosModel.findAll({
+        where: {
+          buscandoRival: true,
+          idUsuarioCompartido: null,
+          estado: 'señado',
+          [Op.not]: { idMP: null }, // Solo turnos realmente señados
+          [Op.not]: { idUsuario: req.user.id }, // Excluir turnos del usuario actual
+          [Op.or]: [
+            {
+              fecha: { [Op.gt]: fechaHoy }, // fechas futuras, cualquier hora
+            },
+            {
+              fecha: fechaHoy,
+              hora: { [Op.gt]: horaActual }, // hoy, hora mayor a ahora
+            },
+          ],
+        },
+        order: [
+          ['fecha', 'ASC'],
+          ['hora', 'ASC'],
+        ],
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario',
+            attributes: ['nombre'],
+          },
+        ],
+      });
       if (turnos.length === 0) {
         return res.status(404).json({ message: 'No se encontraron turnos' });
       }
@@ -33,6 +83,7 @@ export class turnoController {
           message: 'No hay canchas disponibles',
         });
       } else {
+        const { horaAbre, horaCierra } = await getHorarios();
         const hoy = new Date();
         const quincena = new Date(
           new Date().setDate(new Date().getDate() + 15),
@@ -45,23 +96,31 @@ export class turnoController {
               [Op.between]: [hoy, quincena],
             },
             hora: {
-              [Op.between]: ['10:00:00', '23:59:59'],
+              [Op.between]: ['?', '?'],
             },
           },
+          replacements: [`${horaAbre}:00:00`, `${horaCierra}:00:00`],
         });
 
         let allTurnos = [];
         for (let i = 0; i <= 15; i++) {
           const fecha = new Date(hoy);
           fecha.setDate(hoy.getDate() + i);
-          const fechaStr = fecha.toISOString().split('T')[0];
+
+          const fechaStr =
+            hoy.getFullYear() +
+            '-' +
+            String(hoy.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(hoy.getDate()).padStart(2, '0');
+
           const horaActual = i === 0 ? new Date().getHours() : -1; // Solo obtener hora actual si es hoy
           let dia = {
             fecha: fechaStr,
             horarios: [],
           };
 
-          for (let hora = 10; hora <= 23; hora++) {
+          for (let hora = horaAbre; hora < horaCierra; hora++) {
             const horaStr = `${hora.toString().padStart(2, '0')}:00:00`;
             const turnosFiltrados = turnos.filter(
               (t) => t.fecha === fechaStr && t.hora === horaStr,
@@ -185,6 +244,13 @@ export class turnoController {
         error.status = 400;
         throw error;
       } else {
+        const { horaAbre, horaCierra } = await getHorarios();
+        const horaTurno = parseInt(result.data.hora.split(':')[0], 10);
+        if (horaTurno < horaAbre || horaTurno >= horaCierra) {
+          return res.status(400).json({
+            message: `La hora del turno debe estar entre las ${horaAbre}:00 y las ${horaCierra - 1}:00`,
+          });
+        }
         const body = result.data;
         body.idUsuario = req.user.id;
         body.estado = 'señado';
@@ -233,6 +299,41 @@ export class turnoController {
         console.error(error);
         res.status(500).json({ message: 'Error al crear el turno' });
       }
+    }
+  }
+
+  static async unirseTurno(req, res) {
+    try {
+      const { id } = req.params;
+      const idUsuarioCompartido = req.user.id;
+
+      const turno = await getById(id);
+      if (!turno) {
+        return res.status(404).json({ message: 'Turno no encontrado' });
+      } else if (turno.estado !== 'señado' || !turno.idMP) {
+        return res.status(400).json({
+          message: 'El turno no se encuentra en estado "señado"',
+        });
+      } else if (!turno.buscandoRival || turno.idUsuarioCompartido) {
+        return res.status(400).json({
+          message: 'El turno no está disponible para unirse',
+        });
+      } else {
+        const preference = await mercadoPagoController.createPreference({
+          title: `Seña RODO F5 | Día: ${turno.fecha} | Hora: ${turno.hora}`,
+          precio: turno.precioSeña,
+          idReferencia: `${turno.id}-compartido`,
+          endPoint: 'turno-compartido',
+        });
+        await turno.update({
+          urlPreferenciaPagoCompartido: preference.init_point,
+          idUsuarioCompartido,
+        });
+        res.status(200).json(turno);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al unirse al turno' });
     }
   }
 
@@ -336,5 +437,22 @@ async function getPrice({ user, parrilla, compartido }) {
   return {
     precio,
     precioSeña,
+  };
+}
+
+async function getHorarios() {
+  const politicas = await politicaModel.findAll({
+    where: { nombre: ['horaAbre', 'horaCierra'] },
+  });
+  const getValue = (key) => {
+    const politica = politicas.find((p) => p.nombre === key);
+    if (!politica) {
+      throw new Error(`Política ${key} no encontrada`);
+    }
+    return parseInt(politica.descripcion.split(':')[0], 10);
+  };
+  return {
+    horaAbre: getValue('horaAbre'),
+    horaCierra: getValue('horaCierra'),
   };
 }

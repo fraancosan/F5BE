@@ -103,6 +103,13 @@ const turnosModel = db.define(
   },
 );
 
+turnosModel.belongsTo(canchaModel, { foreignKey: 'idCancha', as: 'cancha' });
+turnosModel.belongsTo(usuarioModel, { foreignKey: 'idUsuario', as: 'usuario' });
+turnosModel.belongsTo(usuarioModel, {
+  foreignKey: 'idUsuarioCompartido',
+  as: 'usuarioCompartido',
+});
+
 async function updateIdMP({ id, idMP }) {
   try {
     await db.query(
@@ -122,4 +129,23 @@ async function updateIdMP({ id, idMP }) {
   }
 }
 
-export { turnosModel, updateIdMP };
+async function updateIdMPCompartido({ id, idMP }) {
+  try {
+    await db.query(
+      `
+      UPDATE Turnos
+      SET idMPCompartido = ?
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      {
+        replacements: [idMP, id],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    error.status = 500;
+    throw error;
+  }
+}
+
+export { turnosModel, updateIdMP, updateIdMPCompartido };
