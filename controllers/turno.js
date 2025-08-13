@@ -36,6 +36,8 @@ export class turnoController {
         where: {
           buscandoRival: true,
           idUsuarioCompartido: null,
+          estado: 'señado',
+          [Op.not]: { idMP: null }, // Solo turnos realmente señados
           [Op.not]: { idUsuario: req.user.id }, // Excluir turnos del usuario actual
           [Op.or]: [
             {
@@ -299,7 +301,7 @@ export class turnoController {
       const turno = await getById(id);
       if (!turno) {
         return res.status(404).json({ message: 'Turno no encontrado' });
-      } else if (turno.estado !== 'señado') {
+      } else if (turno.estado !== 'señado' || !turno.idMP) {
         return res.status(400).json({
           message: 'El turno no se encuentra en estado "señado"',
         });
