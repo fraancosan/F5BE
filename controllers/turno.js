@@ -37,7 +37,7 @@ export class turnoController {
           buscandoRival: true,
           idUsuarioCompartido: null,
           estado: 'señado',
-          [Op.not]: { idMP: null }, // Solo turnos realmente señados
+          idMP: { [Op.ne]: null }, // Solo turnos realmente señados
           [Op.not]: { idUsuario: req.user.id }, // Excluir turnos del usuario actual
           [Op.or]: [
             {
