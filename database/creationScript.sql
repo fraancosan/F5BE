@@ -38,6 +38,8 @@ CREATE TABLE EquiposTorneos (
     id INT AUTO_INCREMENT NOT NULL,
     idEquipo INT NOT NULL,
     idTorneo INT NOT NULL,
+    idMP VARCHAR(255) DEFAULT NULL,
+    urlPreferenciaPago VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
     CONSTRAINT FK_EquiposTorneosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id),
     CONSTRAINT FK_EquiposTorneosTorneos FOREIGN KEY (idTorneo) REFERENCES Torneos(id)
