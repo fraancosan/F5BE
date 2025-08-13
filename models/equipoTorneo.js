@@ -1,7 +1,7 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
-import equipoModel from './equipo.js';
-import torneoModel from './torneo.js';
+import { equipoModel } from './equipo.js';
+import { torneoModel } from './torneo.js';
 
 const equipoTorneoModel = db.define(
   'EquiposTorneos',
@@ -43,4 +43,23 @@ const equipoTorneoModel = db.define(
   },
 );
 
-export default equipoTorneoModel;
+async function updateIdMP({ id, idMP }) {
+  try {
+    await db.query(
+      `
+      UPDATE EquiposTorneos
+      SET idMP = ?
+      WHERE id = UUID_TO_BIN(?)
+      `,
+      {
+        replacements: [idMP, id],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    error.status = 500;
+    throw error;
+  }
+}
+
+export { equipoTorneoModel, updateIdMP };

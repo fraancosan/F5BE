@@ -1,5 +1,5 @@
-import torneoModel from '../models/torneo.js';
-import equipoModel from '../models/equipo.js';
+import { torneoModel } from '../models/torneo.js';
+import { equipoModel } from '../models/equipo.js';
 import { Op } from 'sequelize';
 import { validateTorneos, validatePartialTorneos } from '../schemas/torneos.js';
 

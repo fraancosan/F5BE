@@ -1,6 +1,6 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
-import equipoModel from './equipo.js';
+import { equipoModel } from './equipo.js';
 import { usuarioModel } from './Usuario.js';
 
 const equipoUsuarioModel = db.define(

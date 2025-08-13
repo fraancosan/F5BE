@@ -12,7 +12,3 @@ equipoRouter.post('/', equipoController.create);
 equipoRouter.patch('/:id', equipoController.update);
 
 equipoRouter.delete('/:id', equipoController.delete);
-
-equipoRouter.post('/:id/:idTorneo', equipoController.addTorneo);
-
-equipoRouter.delete('/:id/:idTorneo', equipoController.removeTorneo);

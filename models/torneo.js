@@ -1,5 +1,5 @@
 import db from '../database/connection.js';
-import { DataTypes } from 'sequelize';
+import { DataTypes, QueryTypes } from 'sequelize';
 
 const torneoModel = db.define(
   'Torneos',
@@ -34,4 +34,19 @@ const torneoModel = db.define(
   },
 );
 
-export default torneoModel;
+async function getCantidadEquipos(id) {
+  const [result] = await db.query(
+    'SELECT COUNT(*) as cantidad FROM EquiposTorneos WHERE idTorneo = ?',
+    {
+      replacements: { id },
+      type: QueryTypes.SELECT,
+    },
+  );
+  if (!result || !result.cantidad) {
+    return 0;
+  } else {
+    return result.cantidad;
+  }
+}
+
+export { torneoModel, getCantidadEquipos };
