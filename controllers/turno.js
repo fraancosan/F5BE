@@ -153,6 +153,59 @@ export class turnoController {
     }
   }
 
+  static async getParrillaList(req, res) {
+    try {
+      const hoy = new Date();
+      const turnosConParrilla = await turnosModel.findAll({
+        where: {
+          parrilla: true,
+          fecha: {
+            [Op.lte]: hoy,
+          },
+          estado: {
+            [Op.not]: 'cancelado', // Excluir turnos cancelados
+          },
+        },
+        attributes: ['id', 'fecha', 'hora', 'precio', 'idUsuario'],
+        order: [
+          ['fecha', 'DESC'],
+          ['hora', 'DESC'],
+        ],
+      });
+
+      if (turnosConParrilla.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos con parrilla reservada',
+        });
+      }
+
+      // Obtener el precio de la parrilla desde políticas
+      const politicaParrilla = await politicaModel.findOne({
+        where: { nombre: 'precioParrilla' },
+      });
+
+      const precioParrilla = politicaParrilla
+        ? parseFloat(politicaParrilla.descripcion)
+        : 0;
+
+      const cantidadTotalReservas = turnosConParrilla.length;
+      const ingresosTotales = cantidadTotalReservas * precioParrilla;
+
+      const respuesta = {
+        resumen: {
+          cantidadTotalReservas,
+          ingresosTotales,
+        },
+        turnos: turnosConParrilla,
+      };
+
+      res.status(200).json(respuesta);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener listado de parrilla' });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
@@ -219,6 +272,7 @@ export class turnoController {
       res.status(500).json({ message: 'Error al cancelar el turno' });
     }
   }
+
   static async getPrePrice(req, res) {
     try {
       let { parrilla, compartido } = req.query;
