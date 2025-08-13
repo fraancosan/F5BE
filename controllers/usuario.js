@@ -5,7 +5,7 @@ import {
 } from '../schemas/usuarios.js';
 import politicaModel from '../models/politica.js';
 import db from '../database/connection.js';
-
+import { QueryTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -61,10 +61,8 @@ export class UsuarioController {
       SELECT 
         u.id,
         u.nombre,
-        u.apellido,
         u.mail,
         u.telefono,
-        u.rol,
         COUNT(*) AS totalReservas
       FROM Usuarios u
       JOIN Turnos t ON ( 
@@ -72,10 +70,9 @@ export class UsuarioController {
         OR 
         u.id = t.idUsuarioCompartido
       )
-      WHERE 
-        t.estado = 'finalizado' 
+      WHERE t.estado = 'finalizado' 
         AND t.fecha >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-      GROUP BY u.id, u.nombre, u.apellido, u.mail, u.telefono, u.rol
+      GROUP BY u.id, u.nombre, u.mail, u.telefono, u.rol
       HAVING COUNT(*) >= ?
       ORDER BY u.nombre ASC
       `,
