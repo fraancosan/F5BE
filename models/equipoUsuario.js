@@ -50,4 +50,15 @@ equipoUsuarioModel.belongsTo(usuarioModel, {
   as: 'Usuario',
 });
 
-export default equipoUsuarioModel;
+async function isCaptain(idEquipo, idUsuario) {
+  const equipoUsuario = await equipoUsuarioModel.findOne({
+    where: {
+      idEquipo,
+      idUsuario,
+      capitan: 1,
+    },
+  });
+  return !!equipoUsuario;
+}
+
+export { equipoUsuarioModel, isCaptain };
