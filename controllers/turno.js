@@ -155,12 +155,16 @@ export class turnoController {
 
   static async getParrillaList(req, res) {
     try {
-      const hoy = new Date();
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
       const turnosConParrilla = await turnosModel.findAll({
         where: {
           parrilla: true,
           fecha: {
-            [Op.lte]: hoy,
+            [Op.between]: [fechaDesde, fechaHasta],
           },
           estado: {
             [Op.not]: 'cancelado', // Excluir turnos cancelados
