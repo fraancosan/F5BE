@@ -93,7 +93,6 @@ export class mercadoPagoController {
     try {
       const { body } = req;
       const { endPoint } = req.params;
-      console.log('Webhook Payment:', body);
       // body.data.id = 123456; // Just for testing
       if (body.type === 'payment' && body.data.id != 123456) {
         const payment = await new Payment(client).get({ id: body.data.id });
