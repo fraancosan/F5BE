@@ -83,6 +83,7 @@ export class turnoController {
           message: 'No hay canchas disponibles',
         });
       } else {
+        const { horaAbre, horaCierra } = await getHorarios();
         const hoy = new Date();
         const quincena = new Date(
           new Date().setDate(new Date().getDate() + 15),
@@ -95,9 +96,10 @@ export class turnoController {
               [Op.between]: [hoy, quincena],
             },
             hora: {
-              [Op.between]: ['10:00:00', '23:59:59'],
+              [Op.between]: ['?', '?'],
             },
           },
+          replacements: [`${horaAbre}:00:00`, `${horaCierra}:00:00`],
         });
 
         let allTurnos = [];
@@ -118,7 +120,7 @@ export class turnoController {
             horarios: [],
           };
 
-          for (let hora = 10; hora <= 23; hora++) {
+          for (let hora = horaAbre; hora < horaCierra; hora++) {
             const horaStr = `${hora.toString().padStart(2, '0')}:00:00`;
             const turnosFiltrados = turnos.filter(
               (t) => t.fecha === fechaStr && t.hora === horaStr,
@@ -242,6 +244,13 @@ export class turnoController {
         error.status = 400;
         throw error;
       } else {
+        const { horaAbre, horaCierra } = await getHorarios();
+        const horaTurno = parseInt(result.data.hora.split(':')[0], 10);
+        if (horaTurno < horaAbre || horaTurno >= horaCierra) {
+          return res.status(400).json({
+            message: `La hora del turno debe estar entre las ${horaAbre}:00 y las ${horaCierra - 1}:00`,
+          });
+        }
         const body = result.data;
         body.idUsuario = req.user.id;
         body.estado = 'señado';
@@ -428,5 +437,22 @@ async function getPrice({ user, parrilla, compartido }) {
   return {
     precio,
     precioSeña,
+  };
+}
+
+async function getHorarios() {
+  const politicas = await politicaModel.findAll({
+    where: { nombre: ['horaAbre', 'horaCierra'] },
+  });
+  const getValue = (key) => {
+    const politica = politicas.find((p) => p.nombre === key);
+    if (!politica) {
+      throw new Error(`Política ${key} no encontrada`);
+    }
+    return parseInt(politica.descripcion.split(':')[0], 10);
+  };
+  return {
+    horaAbre: getValue('horaAbre'),
+    horaCierra: getValue('horaCierra'),
   };
 }
