@@ -1,5 +1,9 @@
 import { turnosModel } from '../models/turno.js';
-import { validateTurnos, validatePartialTurnos } from '../schemas/turnos.js';
+import {
+  validateTurnos,
+  validatePartialTurnos,
+  validateFecha,
+} from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
 import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
@@ -10,7 +14,31 @@ import db from '../database/connection.js';
 export class turnoController {
   static async getAll(req, res) {
     try {
-      const turnos = await turnosModel.findAll();
+      const { fechai, fechaf } = req.query;
+      let where = {};
+
+      // Validar y extraer el valor si es válido
+      const parsedFechai = validateFecha(fechai);
+      const parsedFechaf = validateFecha(fechaf);
+
+      const fechaInicio = parsedFechai.success ? parsedFechai.data : undefined;
+      const fechaFin = parsedFechaf.success ? parsedFechaf.data : undefined;
+
+      if (fechaInicio && fechaFin) {
+        where.fecha = { [Op.between]: [fechaInicio, fechaFin] };
+      } else if (fechaInicio) {
+        where.fecha = { [Op.gte]: fechaInicio };
+      } else if (fechaFin) {
+        where.fecha = { [Op.lte]: fechaFin };
+      }
+
+      const turnos = await turnosModel.findAll({
+        where,
+        order: [
+          ['fecha', 'ASC'],
+          ['hora', 'ASC'],
+        ],
+      });
       if (turnos.length === 0) {
         return res.status(404).json({ message: 'No se encontraron turnos' });
       }
@@ -37,7 +65,7 @@ export class turnoController {
           buscandoRival: true,
           idUsuarioCompartido: null,
           estado: 'señado',
-          [Op.not]: { idMP: null }, // Solo turnos realmente señados
+          idMP: { [Op.ne]: null }, // Solo turnos realmente señados
           [Op.not]: { idUsuario: req.user.id }, // Excluir turnos del usuario actual
           [Op.or]: [
             {
