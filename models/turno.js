@@ -215,10 +215,22 @@ async function sendEmailNotification() {
       `
       SELECT u.mail
       FROM Turnos t
-      JOIN Usuarios u ON t.idUsuario = u.id
+      JOIN Usuarios u 
+      ON 
+        t.idUsuario = u.id
+        OR t.idUsuarioCompartido = u.id
       WHERE 
         t.estado = 'señado'
+        AND t.idMP IS NOT NULL
         AND TIMESTAMPDIFF(DAY, ?, t.fecha) = 1
+        AND (
+          t.buscandoRival = 0
+          OR (
+            t.buscandoRival = 1
+            AND t.idUsuarioCompartido IS NOT NULL
+            AND t.idMPCompartido IS NOT NULL
+          )
+        )
       `,
       {
         replacements: [fecha],
@@ -226,7 +238,9 @@ async function sendEmailNotification() {
       },
     );
     if (emails.length > 0) {
-      const emailList = emails.map((email) => email.mail).join(', ');
+      const emailList = [...new Set(emails.map((email) => email.mail))].join(
+        ', ',
+      );
       const subject = 'Recordatorio de Turno';
       const text = `Estimado usuario, le recordamos que tiene un turno agendado para mañana.`;
       const html = `<p>Estimado usuario, le recordamos que tiene un turno agendado para <b>mañana</b>.</p>`;
