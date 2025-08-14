@@ -28,6 +28,11 @@ const equipoTorneoModel = db.define(
         key: 'id',
       },
     },
+    fechaCreacion: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
     idMP: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -62,4 +67,27 @@ async function updateIdMP({ id, idMP }) {
   }
 }
 
-export { equipoTorneoModel, updateIdMP };
+async function cancelInscripcion() {
+  const date = new Date();
+  const timeLimit = process.env.MP_TIME ?? 30;
+
+  try {
+    await db.query(
+      `
+      DELETE FROM EquiposTorneos
+      WHERE 
+        idMP IS NULL
+        AND
+        TIMESTAMPDIFF(MINUTE, fechaCreacion, ?) >= ?
+      `,
+      {
+        replacements: [date, timeLimit],
+        type: QueryTypes.DELETE,
+      },
+    );
+  } catch (error) {
+    console.error('Error canceling inscription:', error);
+  }
+}
+
+export { equipoTorneoModel, updateIdMP, cancelInscripcion };

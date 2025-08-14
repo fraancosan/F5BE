@@ -346,6 +346,7 @@ export class turnoController {
         await turno.update({
           urlPreferenciaPagoCompartido: preference.init_point,
           idUsuarioCompartido,
+          fechaUsuarioCompartido: new Date(),
         });
         res.status(200).json(turno);
       }

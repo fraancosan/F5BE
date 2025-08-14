@@ -30,6 +30,8 @@
 ## Others
 
 - `JWT_PASSWORD`: This should be the password for JWT tokens.
+- `MP_TIME`: This should be the time in minutes for which the Mercado Pago payment link will be valid. It is used to set the expiration time for the payment link.
+- `START_CRONS`: This should be set to `true` if you want to start the cron jobs for your application. Cron jobs are scheduled tasks that run at specified intervals.
 
 ## Example `.env` File
 
@@ -43,6 +45,10 @@ DATABASE_DB=your_database_name
 PORT_DB=3306
 
 JWT_PASSWORD=yourJWTToken
+
+MP_TIME=30
+
+START_CRONS=true
 
 NAME_EMAIL=Your Name
 USER_EMAIL=example@gmail.com
