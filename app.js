@@ -11,6 +11,7 @@ import { partidoTorneoRouter } from './routes/partidoTorneo.js';
 import { equipoUsuarioRouter } from './routes/equipoUsuario.js';
 import { equipoTorneoRouter } from './routes/equipoTorneo.js';
 import { turnoRouter } from './routes/turnos.js';
+import { cronsController } from './controllers/extras/crons.js';
 
 const app = express();
 
@@ -38,6 +39,20 @@ app.use('/mercadopago', mercadoPagoRouter);
 app.get('/', (_, res) => {
   res.status(404).json({ error: 'Recurso no encontrado' });
 });
+
+// Start crons
+const startCrons = process.env.START_CRONS === 'true';
+
+if (startCrons) {
+  const crons = new cronsController(true);
+  console.log('Crons working:');
+  Object.entries(crons.getTasks()).forEach(([taskName, task]) => {
+    console.log(`- ${taskName}`);
+  });
+  console.log('');
+} else {
+  console.log('Crons not working, check env variables');
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

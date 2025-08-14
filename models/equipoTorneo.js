@@ -62,4 +62,6 @@ async function updateIdMP({ id, idMP }) {
   }
 }
 
-export { equipoTorneoModel, updateIdMP };
+async function cancelInscripcion() {}
+
+export { equipoTorneoModel, updateIdMP, cancelInscripcion };

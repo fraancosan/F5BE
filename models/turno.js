@@ -148,4 +148,14 @@ async function updateIdMPCompartido({ id, idMP }) {
   }
 }
 
-export { turnosModel, updateIdMP, updateIdMPCompartido };
+async function cancelTurno() {}
+
+async function cancelTurnoCompartido() {}
+
+export {
+  turnosModel,
+  updateIdMP,
+  updateIdMPCompartido,
+  cancelTurno,
+  cancelTurnoCompartido,
+};
