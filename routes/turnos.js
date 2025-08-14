@@ -4,7 +4,7 @@ import { authUser } from '../middlewares/auth.js';
 
 export const turnoRouter = Router();
 
-turnoRouter.get('/', turnoController.getAll);
+turnoRouter.get('/', authUser, turnoController.getAll);
 
 turnoRouter.get('/disponibles', turnoController.getAvailableTurnos);
 

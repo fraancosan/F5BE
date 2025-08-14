@@ -66,3 +66,13 @@ export function validateFecha(fecha) {
     )
     .safeParse(fecha);
 }
+
+export function validateHora(hora) {
+  return z
+    .string()
+    .regex(
+      /^([01]\d|2[0-3]):00:00$/,
+      'Invalid time format, expected HH:MM:SS, MM = SS = 00',
+    )
+    .safeParse(hora);
+}
