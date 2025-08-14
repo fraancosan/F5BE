@@ -3,6 +3,7 @@ import {
   validateTurnos,
   validatePartialTurnos,
   validateFecha,
+  validateHora,
 } from '../schemas/turnos.js';
 import { mercadoPagoController } from './extras/mercadoPago.js';
 import { Op, literal } from 'sequelize';
@@ -15,15 +16,28 @@ import { getLocalDate } from '../utils/common.js';
 export class turnoController {
   static async getAll(req, res) {
     try {
-      const { fechai, fechaf } = req.query;
+      const { fechai, fechaf, horai, horaf } = req.query;
       let where = {};
+
+      if (req.user.rol !== 'admin') {
+        where = {
+          [Op.or]: [
+            { idUsuario: req.user.id },
+            { idUsuarioCompartido: req.user.id },
+          ],
+        };
+      }
 
       // Validar y extraer el valor si es válido
       const parsedFechai = validateFecha(fechai);
       const parsedFechaf = validateFecha(fechaf);
+      const parsedHorai = validateHora(horai);
+      const parsedHoraf = validateHora(horaf);
 
       const fechaInicio = parsedFechai.success ? parsedFechai.data : undefined;
       const fechaFin = parsedFechaf.success ? parsedFechaf.data : undefined;
+      const horaInicio = parsedHorai.success ? parsedHorai.data : undefined;
+      const horaFin = parsedHoraf.success ? parsedHoraf.data : undefined;
 
       if (fechaInicio && fechaFin) {
         where.fecha = { [Op.between]: [fechaInicio, fechaFin] };
@@ -31,6 +45,13 @@ export class turnoController {
         where.fecha = { [Op.gte]: fechaInicio };
       } else if (fechaFin) {
         where.fecha = { [Op.lte]: fechaFin };
+      }
+      if (horaInicio && horaFin) {
+        where.hora = { [Op.between]: [horaInicio, horaFin] };
+      } else if (horaInicio) {
+        where.hora = { [Op.gte]: horaInicio };
+      } else if (horaFin) {
+        where.hora = { [Op.lte]: horaFin };
       }
 
       const turnos = await turnosModel.findAll({

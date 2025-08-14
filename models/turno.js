@@ -3,6 +3,8 @@ import { DataTypes, QueryTypes } from 'sequelize';
 import { canchaModel } from './cancha.js';
 import { usuarioModel } from './Usuario.js';
 import { v4, parse as uuidParse, stringify as uuidStringify } from 'uuid';
+import { sendEmail } from '../utils/nodemailer.js';
+import { getLocalDate } from '../utils/common.js';
 
 const turnosModel = db.define(
   'Turnos',
@@ -205,10 +207,58 @@ async function cancelTurnoCompartido() {
   }
 }
 
+async function sendEmailNotification() {
+  const fecha = getLocalDate();
+
+  try {
+    const emails = await db.query(
+      `
+      SELECT u.mail
+      FROM Turnos t
+      JOIN Usuarios u 
+      ON 
+        t.idUsuario = u.id
+        OR t.idUsuarioCompartido = u.id
+      WHERE 
+        t.estado = 'señado'
+        AND t.idMP IS NOT NULL
+        AND TIMESTAMPDIFF(DAY, ?, t.fecha) = 1
+        AND (
+          t.buscandoRival = 0
+          OR (
+            t.buscandoRival = 1
+            AND t.idUsuarioCompartido IS NOT NULL
+            AND t.idMPCompartido IS NOT NULL
+          )
+        )
+      `,
+      {
+        replacements: [fecha],
+        type: QueryTypes.SELECT,
+      },
+    );
+    if (emails.length > 0) {
+      const emailList = [...new Set(emails.map((email) => email.mail))].join(
+        ', ',
+      );
+      const subject = 'Recordatorio de Turno';
+      const text = `Estimado usuario, le recordamos que tiene un turno agendado para mañana.`;
+      const html = `<p>Estimado usuario, le recordamos que tiene un turno agendado para <b>mañana</b>.</p>`;
+      await sendEmail({ email: emailList, subject, text, html });
+      console.log(`Se han enviado ${emails.length} notificaciones`);
+    } else {
+      console.log('No hay turnos agendados para mañana.');
+    }
+  } catch (error) {
+    console.error('Sending email notification:', error);
+  }
+}
+
 export {
   turnosModel,
   updateIdMP,
   updateIdMPCompartido,
   cancelTurno,
   cancelTurnoCompartido,
+  sendEmailNotification,
 };
