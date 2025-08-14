@@ -79,6 +79,10 @@ const turnosModel = db.define(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+    fechaUsuarioCompartido: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     idMP: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -148,9 +152,58 @@ async function updateIdMPCompartido({ id, idMP }) {
   }
 }
 
-async function cancelTurno() {}
+async function cancelTurno() {
+  const date = new Date();
+  const timeLimit = process.env.MP_TIME ?? 30;
 
-async function cancelTurnoCompartido() {}
+  try {
+    await db.query(
+      `
+      UPDATE Turnos
+      SET estado = 'cancelado'
+      WHERE 
+        idMP IS NULL
+        AND
+        TIMESTAMPDIFF(MINUTE, fechaCreacion, ?) >= ?
+      `,
+      {
+        replacements: [date, timeLimit],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    console.error('Error canceling turno:', error);
+  }
+}
+
+async function cancelTurnoCompartido() {
+  const date = new Date();
+  const timeLimit = process.env.MP_TIME ?? 30;
+
+  try {
+    await db.query(
+      `
+      UPDATE Turnos
+      SET 
+        idMPCompartido = NULL, 
+        idUsuarioCompartido = NULL, 
+        fechaUsuarioCompartido = NULL, 
+        urlPreferenciaPagoCompartido = NULL
+      WHERE 
+        idMPCompartido IS NULL
+        AND buscandoRival = 1
+        AND idUsuarioCompartido IS NOT NULL
+        AND TIMESTAMPDIFF(MINUTE, fechaUsuarioCompartido, ?) >= ?
+      `,
+      {
+        replacements: [date, timeLimit],
+        type: QueryTypes.UPDATE,
+      },
+    );
+  } catch (error) {
+    console.error('Error canceling turno:', error);
+  }
+}
 
 export {
   turnosModel,
