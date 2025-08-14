@@ -8,6 +8,7 @@ import db from '../database/connection.js';
 import { QueryTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { sendEmail } from '../utils/nodemailer.js';
 
 export class UsuarioController {
   static async getAll(req, res) {
@@ -199,6 +200,32 @@ export class UsuarioController {
       res.status(500).json({
         message: 'Ocurrio un error a la hora de loguear el usuario',
       });
+    }
+  }
+
+  static async sendEmail(req, res) {
+    const { id } = req.params;
+    const { subject, text } = req.body;
+    try {
+      const usuario = await usuarioModel.findByPk(id);
+      if (!usuario) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      } else if (!subject || !text) {
+        return res
+          .status(400)
+          .json({ message: 'El subject y el texto son obligatorios' });
+      }
+      const response = await sendEmail({ email: usuario.mail, subject, text });
+      if (response) {
+        return res
+          .status(200)
+          .json({ message: 'Correo enviado correctamente' });
+      } else {
+        return res.status(500).json({ message: 'Error al enviar el correo' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al enviar el correo' });
     }
   }
 }
