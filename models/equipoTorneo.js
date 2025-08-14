@@ -1,5 +1,5 @@
 import db from '../database/connection.js';
-import { DataTypes } from 'sequelize';
+import { DataTypes, QueryTypes } from 'sequelize';
 import { equipoModel } from './equipo.js';
 import { torneoModel } from './torneo.js';
 
@@ -49,7 +49,7 @@ async function updateIdMP({ id, idMP }) {
       `
       UPDATE EquiposTorneos
       SET idMP = ?
-      WHERE id = UUID_TO_BIN(?)
+      WHERE id = ?
       `,
       {
         replacements: [idMP, id],

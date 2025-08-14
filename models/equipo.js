@@ -19,7 +19,7 @@ async function getCantidadMiembros(id) {
   const [result] = await db.query(
     'SELECT COUNT(*) as cantidad FROM EquiposUsuarios WHERE idEquipo = ?',
     {
-      replacements: { id },
+      replacements: [id],
       type: QueryTypes.SELECT,
     },
   );

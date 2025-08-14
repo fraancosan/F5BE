@@ -41,6 +41,7 @@ CREATE TABLE EquiposTorneos (
     idMP VARCHAR(255) DEFAULT NULL,
     urlPreferenciaPago VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT unique_equipo_torneo UNIQUE (idEquipo, idTorneo),
     CONSTRAINT FK_EquiposTorneosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id),
     CONSTRAINT FK_EquiposTorneosTorneos FOREIGN KEY (idTorneo) REFERENCES Torneos(id)
 );
