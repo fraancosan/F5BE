@@ -6,6 +6,7 @@ import {
 } from 'mercadopago';
 import 'dotenv/config';
 import { updateIdMP, updateIdMPCompartido } from '../../models/turno.js';
+import { updateIdMP as updateIdMPET } from '../../models/equipoTorneo.js';
 
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -107,6 +108,9 @@ export class mercadoPagoController {
           } else if (endPoint === 'turno-compartido') {
             datos.id = datos.id.replace('-compartido', '');
             await updateIdMPCompartido(datos);
+          } else if (endPoint === 'equipo-torneo') {
+            datos.id = datos.id.split('-')[0];
+            await updateIdMPET(datos);
           } else {
             res.status(404).json({
               message: 'EndPoint no especificado',

@@ -9,6 +9,7 @@ import { usuarioRouter } from './routes/usuario.js';
 import { mercadoPagoRouter } from './routes/extras/mercadoPago.js';
 import { partidoTorneoRouter } from './routes/partidoTorneo.js';
 import { equipoUsuarioRouter } from './routes/equipoUsuario.js';
+import { equipoTorneoRouter } from './routes/equipoTorneo.js';
 import { turnoRouter } from './routes/turnos.js';
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/canchas', canchaRouter);
 app.use('/usuarios', usuarioRouter);
 app.use('/partidos', partidoTorneoRouter);
 app.use('/equiposUsuarios', equipoUsuarioRouter);
+app.use('/equiposTorneos', equipoTorneoRouter);
 app.use('/turnos', turnoRouter);
 
 // extras
