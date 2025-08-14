@@ -1,5 +1,9 @@
 import cron from 'node-cron';
-import { cancelTurno, cancelTurnoCompartido } from '../../models/turno.js';
+import {
+  cancelTurno,
+  cancelTurnoCompartido,
+  sendEmailNotification,
+} from '../../models/turno.js';
 import { cancelInscripcion } from '../../models/equipoTorneo.js';
 
 export class cronsController {
@@ -25,7 +29,6 @@ export class cronsController {
           name: 'cancel-turno-compartido',
         },
       ),
-
       'cancel-inscripcion': cron.schedule(
         '*/5 * * * *',
         () => {
@@ -34,6 +37,16 @@ export class cronsController {
         {
           scheduled: autoStart,
           name: 'cancel-inscripcion',
+        },
+      ),
+      'enviar-recordatorio-turno': cron.schedule(
+        '0 8 * * *', // Todos los días a las 8 AM
+        () => {
+          sendEmailNotification();
+        },
+        {
+          scheduled: autoStart,
+          name: 'enviar-recordatorio-turno',
         },
       ),
     };
