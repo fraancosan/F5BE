@@ -16,3 +16,5 @@ usuarioRouter.patch('/:id', UsuarioController.update);
 usuarioRouter.delete('/:id', UsuarioController.delete);
 
 usuarioRouter.post('/login', UsuarioController.loginUser);
+
+usuarioRouter.post('/send-email/:id', UsuarioController.sendEmail);
