@@ -1,6 +1,6 @@
 import db from '../database/connection.js';
 import { DataTypes } from 'sequelize';
-import equipoModel from './equipo.js';
+import { equipoModel } from './equipo.js';
 import { usuarioModel } from './Usuario.js';
 
 const equipoUsuarioModel = db.define(
@@ -50,4 +50,15 @@ equipoUsuarioModel.belongsTo(usuarioModel, {
   as: 'Usuario',
 });
 
-export default equipoUsuarioModel;
+async function isCaptain(idEquipo, idUsuario) {
+  const equipoUsuario = await equipoUsuarioModel.findOne({
+    where: {
+      idEquipo,
+      idUsuario,
+      capitan: 1,
+    },
+  });
+  return !!equipoUsuario;
+}
+
+export { equipoUsuarioModel, isCaptain };

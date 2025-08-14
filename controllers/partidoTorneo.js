@@ -1,6 +1,6 @@
 import partidoTorneoModel from '../models/partidoTorneo.js';
-import equipoModel from '../models/equipo.js';
-import torneoModel from '../models/torneo.js';
+import { equipoModel } from '../models/equipo.js';
+import { torneoModel } from '../models/torneo.js';
 import {
   validatePartidosTorneos,
   validatePartialPartidosTorneos,

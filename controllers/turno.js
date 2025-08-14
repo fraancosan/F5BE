@@ -10,6 +10,7 @@ import { canchaModel, getAvailableCanchas } from '../models/cancha.js';
 import { isPremium, usuarioModel } from '../models/Usuario.js';
 import politicaModel from '../models/politica.js';
 import db from '../database/connection.js';
+import { getLocalDate } from '../utils/common.js';
 
 export class turnoController {
   static async getAll(req, res) {
@@ -52,12 +53,7 @@ export class turnoController {
   static async getBuscarRival(req, res) {
     try {
       const hoy = new Date();
-      const fechaHoy =
-        hoy.getFullYear() +
-        '-' +
-        String(hoy.getMonth() + 1).padStart(2, '0') +
-        '-' +
-        String(hoy.getDate()).padStart(2, '0');
+      const fechaHoy = getLocalDate();
       const horaActual = new Date().getHours() + ':00:00';
 
       const turnos = await turnosModel.findAll({
@@ -134,13 +130,7 @@ export class turnoController {
         for (let i = 0; i <= 15; i++) {
           const fecha = new Date(hoy);
           fecha.setDate(hoy.getDate() + i);
-
-          const fechaStr =
-            hoy.getFullYear() +
-            '-' +
-            String(hoy.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(hoy.getDate()).padStart(2, '0');
+          const fechaStr = getLocalDate(fecha);
 
           const horaActual = i === 0 ? new Date().getHours() : -1; // Solo obtener hora actual si es hoy
           let dia = {
