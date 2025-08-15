@@ -210,6 +210,73 @@ export class turnoController {
     }
   }
 
+  static async getCanceladosList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const turnosCancelados = await turnosModel.findAll({
+        where: {
+          estado: 'cancelado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'id',
+          'fecha',
+          'hora',
+          'buscandoRival',
+          'parrilla',
+          [db.fn('COUNT', db.col('idUsuario')), 'cantidadDelUsuario'],
+          [db.fn('SUM', db.col('precio')), 'totalPerdidas'],
+        ],
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario',
+            attributes: ['dni'],
+            required: true,
+          },
+        ],
+        group: [
+          'id',
+          'usuario.dni',
+          'fecha',
+          'hora',
+          'buscandoRival',
+          'parrilla',
+          'usuario.id',
+        ],
+        order: [
+          ['fecha', 'DESC'],
+          ['hora', 'DESC'],
+        ],
+        // raw: false, // Para que mantenga la estructura de objetos
+      });
+
+      if (turnosCancelados.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos cancelados',
+        });
+      }
+
+      const respuesta = {
+        cantidadTotalCancelados: turnosCancelados.length,
+        turnos: turnosCancelados,
+      };
+
+      res.status(200).json(respuesta);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener listado de turnos cancelados' });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
