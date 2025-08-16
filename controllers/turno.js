@@ -167,7 +167,7 @@ export class turnoController {
             [Op.between]: [fechaDesde, fechaHasta],
           },
           estado: {
-            [Op.not]: 'cancelado', // Excluir turnos cancelados
+            [Op.not]: 'cancelado',
           },
         },
         attributes: ['id', 'fecha', 'hora', 'precio', 'idUsuario'],
@@ -274,6 +274,45 @@ export class turnoController {
       res
         .status(500)
         .json({ message: 'Error al obtener listado de turnos cancelados' });
+    }
+  }
+
+  static async getIngresosList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const ingresos = await turnosModel.findAll({
+        where: {
+          estado: 'finalizado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'id',
+          'fecha',
+          'precio',
+          [literal('SUM(precio) OVER ()'), 'totalIngresos'],
+        ],
+        order: [['fecha', 'DESC']],
+      });
+
+      if (ingresos.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos para calcular el ingreso',
+        });
+      }
+
+      res.status(200).json({
+        ingresos,
+        totalIngresos: Number(ingresos[0].dataValues.totalIngresos),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener listado de ingresos' });
     }
   }
 

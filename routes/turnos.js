@@ -14,6 +14,8 @@ turnoRouter.get('/reporte-parrillas', turnoController.getParrillaList);
 
 turnoRouter.get('/reporte-cancelados', turnoController.getCanceladosList);
 
+turnoRouter.get('/reporte-ingresos', turnoController.getIngresosList);
+
 turnoRouter.get('/pre-precio', authUser, turnoController.getPrePrice);
 
 turnoRouter.get('/:id', turnoController.getById);
