@@ -230,8 +230,9 @@ export class turnoController {
           'hora',
           'buscandoRival',
           'parrilla',
+          'precio',
           [db.fn('COUNT', db.col('idUsuario')), 'cantidadDelUsuario'],
-          [db.fn('SUM', db.col('precio')), 'totalPerdidas'],
+          [literal('SUM(precio) OVER ()'), 'totalPerdidas'],
         ],
         include: [
           {
@@ -249,12 +250,12 @@ export class turnoController {
           'buscandoRival',
           'parrilla',
           'usuario.id',
+          'precio',
         ],
         order: [
           ['fecha', 'DESC'],
           ['hora', 'DESC'],
         ],
-        // raw: false, // Para que mantenga la estructura de objetos
       });
 
       if (turnosCancelados.length === 0) {
@@ -265,6 +266,7 @@ export class turnoController {
 
       const respuesta = {
         cantidadTotalCancelados: turnosCancelados.length,
+        totalPerdidas: Number(turnosCancelados[0].dataValues.totalPerdidas),
         turnos: turnosCancelados,
       };
 
