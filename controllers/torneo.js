@@ -1,6 +1,7 @@
 import { torneoModel } from '../models/torneo.js';
 import { equipoModel } from '../models/equipo.js';
 import { Op } from 'sequelize';
+import db from '../database/connection.js';
 import { validateTorneos, validatePartialTorneos } from '../schemas/torneos.js';
 
 export class torneoController {
@@ -45,6 +46,48 @@ export class torneoController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al obtener el torneo' });
+    }
+  }
+
+  static async getIngresosList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const ingresos = await torneoModel.findAll({
+        where: {
+          fechaInicio: { [Op.between]: [fechaDesde, fechaHasta] },
+        },
+        attributes: [
+          'fechaInicio',
+          [db.fn('SUM', db.col('precioInscripcion')), 'ingresosDelDia'],
+          [
+            db.literal('SUM(SUM(precioInscripcion)) OVER ()'),
+            'ingresosTotales',
+          ],
+        ],
+        group: ['fechaInicio'],
+        order: [['fechaInicio', 'DESC']],
+        raw: true,
+      });
+
+      if (ingresos.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron torneos para calcular el ingreso',
+        });
+      }
+
+      res.status(200).json({
+        totalIngresos: Number(ingresos[0].ingresosTotales),
+        ingresos,
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener la lista de ingresos' });
     }
   }
 

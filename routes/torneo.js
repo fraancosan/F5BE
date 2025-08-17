@@ -5,6 +5,8 @@ export const torneoRouter = Router();
 
 torneoRouter.get('/', torneoController.getAll);
 
+torneoRouter.get('/reporte-ingresos', torneoController.getIngresosList);
+
 torneoRouter.get('/:id', torneoController.getById);
 
 torneoRouter.post('/', torneoController.create);
