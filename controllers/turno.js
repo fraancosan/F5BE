@@ -318,6 +318,47 @@ export class turnoController {
     }
   }
 
+  static async getCantPorDiaList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const turnosPorDia = await turnosModel.findAll({
+        where: {
+          estado: 'finalizado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'fecha',
+          [db.fn('COUNT', db.col('buscandoRival')), 'cantidadBuscandoRival'],
+          [db.fn('COUNT', db.col('parrilla')), 'cantidadParrilla'],
+          [db.fn('COUNT', db.col('id')), 'cantidadTurnos'],
+        ],
+        group: ['fecha'],
+        order: [['fecha', 'DESC']],
+      });
+
+      if (turnosPorDia.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos para calcular la cantidad por día',
+        });
+      }
+
+      res.status(200).json({
+        turnos: turnosPorDia,
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener listado de turnos por día' });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
