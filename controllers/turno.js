@@ -327,16 +327,16 @@ export class turnoController {
 
       const turnosPorDia = await turnosModel.findAll({
         where: {
-          estado: 'finalizado',
+          // estado: 'finalizado',
           fecha: {
             [Op.between]: [fechaDesde, fechaHasta],
           },
         },
         attributes: [
           'fecha',
-          [db.fn('COUNT', db.col('buscandoRival')), 'cantidadBuscandoRival'],
-          [db.fn('COUNT', db.col('parrilla')), 'cantidadParrilla'],
           [db.fn('COUNT', db.col('id')), 'cantidadTurnos'],
+          [db.fn('SUM', db.col('buscandoRival')), 'cantidadBuscandoRival'],
+          [db.fn('SUM', db.col('parrilla')), 'cantidadParrilla'],
         ],
         group: ['fecha'],
         order: [['fecha', 'DESC']],
@@ -348,8 +348,21 @@ export class turnoController {
         });
       }
 
+      const totales = await turnosModel.findOne({
+        where: {
+          // estado: 'finalizado',
+          fecha: { [Op.between]: [fechaDesde, fechaHasta] },
+        },
+        attributes: [
+          [db.fn('COUNT', db.col('id')), 'totalTurnos'],
+          [db.fn('SUM', db.col('buscandoRival')), 'totalBuscandoRival'],
+          [db.fn('SUM', db.col('parrilla')), 'totalParrilla'],
+        ],
+      });
+
       res.status(200).json({
-        turnos: turnosPorDia,
+        turnosPorDia,
+        totales,
       });
     } catch (error) {
       console.error(error);
