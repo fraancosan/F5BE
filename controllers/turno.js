@@ -391,8 +391,8 @@ export class turnoController {
       });
 
       res.status(200).json({
-        turnosPorDia,
         totales,
+        turnosPorDia,
       });
     } catch (error) {
       console.error(error);
