@@ -61,6 +61,7 @@ export class UsuarioController {
         `
       SELECT 
         u.id,
+        u.dni,
         u.nombre,
         u.mail,
         u.telefono,
