@@ -192,6 +192,225 @@ export class turnoController {
     }
   }
 
+  static async getParrillaList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const turnosConParrilla = await turnosModel.findAll({
+        where: {
+          parrilla: true,
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+          estado: {
+            [Op.not]: 'cancelado',
+          },
+        },
+        attributes: ['id', 'fecha', 'hora', 'precio', 'idUsuario'],
+        order: [
+          ['fecha', 'DESC'],
+          ['hora', 'DESC'],
+        ],
+      });
+
+      if (turnosConParrilla.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos con parrilla reservada',
+        });
+      }
+
+      // Obtener el precio de la parrilla desde políticas
+      const politicaParrilla = await politicaModel.findOne({
+        where: { nombre: 'precioParrilla' },
+      });
+
+      const precioParrilla = politicaParrilla
+        ? parseFloat(politicaParrilla.descripcion)
+        : 0;
+
+      const cantidadTotalReservas = turnosConParrilla.length;
+      const ingresosTotales = cantidadTotalReservas * precioParrilla;
+
+      const respuesta = {
+        resumen: {
+          cantidadTotalReservas,
+          ingresosTotales,
+        },
+        turnos: turnosConParrilla,
+      };
+
+      res.status(200).json(respuesta);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener listado de parrilla' });
+    }
+  }
+
+  static async getCanceladosList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const turnosCancelados = await turnosModel.findAll({
+        where: {
+          estado: 'cancelado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'id',
+          'fecha',
+          'hora',
+          'buscandoRival',
+          'parrilla',
+          'precio',
+          [db.fn('COUNT', db.col('idUsuario')), 'cantidadDelUsuario'],
+          [literal('SUM(precio) OVER ()'), 'totalPerdidas'],
+        ],
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario',
+            attributes: ['dni'],
+            required: true,
+          },
+        ],
+        group: [
+          'id',
+          'usuario.dni',
+          'fecha',
+          'hora',
+          'buscandoRival',
+          'parrilla',
+          'usuario.id',
+          'precio',
+        ],
+        order: [
+          ['fecha', 'DESC'],
+          ['hora', 'DESC'],
+        ],
+      });
+
+      if (turnosCancelados.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos cancelados',
+        });
+      }
+
+      const respuesta = {
+        cantidadTotalCancelados: turnosCancelados.length,
+        totalPerdidas: Number(turnosCancelados[0].dataValues.totalPerdidas),
+        turnos: turnosCancelados,
+      };
+
+      res.status(200).json(respuesta);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener listado de turnos cancelados' });
+    }
+  }
+
+  static async getIngresosList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const ingresos = await turnosModel.findAll({
+        where: {
+          estado: 'finalizado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'id',
+          'fecha',
+          'precio',
+          [literal('SUM(precio) OVER ()'), 'totalIngresos'],
+        ],
+        order: [['fecha', 'DESC']],
+      });
+
+      if (ingresos.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos para calcular el ingreso',
+        });
+      }
+
+      res.status(200).json({
+        ingresos,
+        totalIngresos: Number(ingresos[0].dataValues.totalIngresos),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener listado de ingresos' });
+    }
+  }
+
+  static async getCantPorDiaList(req, res) {
+    try {
+      const fechaDesde = new Date(req.query.fechaD);
+      const fechaHasta = req.query.fechaH
+        ? new Date(req.query.fechaH)
+        : new Date();
+
+      const turnosPorDia = await turnosModel.findAll({
+        where: {
+          // estado: 'finalizado',
+          fecha: {
+            [Op.between]: [fechaDesde, fechaHasta],
+          },
+        },
+        attributes: [
+          'fecha',
+          [db.fn('COUNT', db.col('id')), 'cantidadTurnos'],
+          [db.fn('SUM', db.col('buscandoRival')), 'cantidadBuscandoRival'],
+          [db.fn('SUM', db.col('parrilla')), 'cantidadParrilla'],
+        ],
+        group: ['fecha'],
+        order: [['fecha', 'DESC']],
+      });
+
+      if (turnosPorDia.length === 0) {
+        return res.status(404).json({
+          message: 'No se encontraron turnos para calcular la cantidad por día',
+        });
+      }
+
+      const totales = await turnosModel.findOne({
+        where: {
+          // estado: 'finalizado',
+          fecha: { [Op.between]: [fechaDesde, fechaHasta] },
+        },
+        attributes: [
+          [db.fn('COUNT', db.col('id')), 'totalTurnos'],
+          [db.fn('SUM', db.col('buscandoRival')), 'totalBuscandoRival'],
+          [db.fn('SUM', db.col('parrilla')), 'totalParrilla'],
+        ],
+      });
+
+      res.status(200).json({
+        turnosPorDia,
+        totales,
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener listado de turnos por día' });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
@@ -258,6 +477,7 @@ export class turnoController {
       res.status(500).json({ message: 'Error al cancelar el turno' });
     }
   }
+
   static async getPrePrice(req, res) {
     try {
       let { parrilla, compartido } = req.query;
