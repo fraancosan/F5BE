@@ -328,17 +328,16 @@ export class turnoController {
       const ingresos = await turnosModel.findAll({
         where: {
           estado: 'finalizado',
-          fecha: {
-            [Op.between]: [fechaDesde, fechaHasta],
-          },
+          fecha: { [Op.between]: [fechaDesde, fechaHasta] },
         },
         attributes: [
-          'id',
           'fecha',
-          'precio',
-          [literal('SUM(precio) OVER ()'), 'totalIngresos'],
+          [db.fn('SUM', db.col('precio')), 'ingresosDelDia'],
+          [db.literal('SUM(SUM(precio)) OVER ()'), 'ingresosTotales'],
         ],
+        group: ['fecha'],
         order: [['fecha', 'DESC']],
+        raw: true,
       });
 
       if (ingresos.length === 0) {
@@ -349,7 +348,7 @@ export class turnoController {
 
       res.status(200).json({
         ingresos,
-        totalIngresos: Number(ingresos[0].dataValues.totalIngresos),
+        totalIngresos: Number(ingresos[0].ingresosTotales),
       });
     } catch (error) {
       console.error(error);
