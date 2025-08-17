@@ -210,6 +210,14 @@ export class turnoController {
           },
         },
         attributes: ['id', 'fecha', 'hora', 'precio', 'idUsuario'],
+        include: [
+          {
+            model: usuarioModel,
+            as: 'usuario',
+            attributes: ['nombre'],
+            required: true,
+          },
+        ],
         order: [
           ['fecha', 'DESC'],
           ['hora', 'DESC'],
