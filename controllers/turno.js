@@ -259,19 +259,19 @@ export class turnoController {
       const turnosCancelados = await turnosModel.findAll({
         where: {
           estado: 'cancelado',
-          fecha: {
-            [Op.between]: [fechaDesde, fechaHasta],
-          },
+          fecha: { [Op.between]: [fechaDesde, fechaHasta] },
         },
         attributes: [
-          'id',
           'fecha',
           'hora',
           'buscandoRival',
           'parrilla',
-          'precio',
-          [db.fn('COUNT', db.col('idUsuario')), 'cantidadDelUsuario'],
-          [literal('SUM(precio) OVER ()'), 'totalPerdidas'],
+          ['precio', 'perdidaIndividual'],
+          [db.literal('SUM(precio) OVER()'), 'totalPerdidas'],
+          [
+            db.literal('COUNT(*) OVER(PARTITION BY `usuario`.`id`)'),
+            'cantidadDelUsuario',
+          ],
         ],
         include: [
           {
@@ -281,20 +281,12 @@ export class turnoController {
             required: true,
           },
         ],
-        group: [
-          'id',
-          'usuario.dni',
-          'fecha',
-          'hora',
-          'buscandoRival',
-          'parrilla',
-          'usuario.id',
-          'precio',
-        ],
         order: [
           ['fecha', 'DESC'],
           ['hora', 'DESC'],
         ],
+        raw: true,
+        nest: true,
       });
 
       if (turnosCancelados.length === 0) {
@@ -305,7 +297,7 @@ export class turnoController {
 
       const respuesta = {
         cantidadTotalCancelados: turnosCancelados.length,
-        totalPerdidas: Number(turnosCancelados[0].dataValues.totalPerdidas),
+        totalPerdidas: Number(turnosCancelados[0].totalPerdidas),
         turnos: turnosCancelados,
       };
 
