@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { equipoController } from '../controllers/equipo.js';
+import { authUser } from '../middlewares/auth.js';
 
 export const equipoRouter = Router();
 
@@ -7,7 +8,7 @@ equipoRouter.get('/', equipoController.getAll);
 
 equipoRouter.get('/:id', equipoController.getById);
 
-equipoRouter.post('/', equipoController.create);
+equipoRouter.post('/', authUser, equipoController.create);
 
 equipoRouter.patch('/:id', equipoController.update);
 
