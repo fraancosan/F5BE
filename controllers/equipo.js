@@ -2,6 +2,9 @@ import { equipoModel } from '../models/equipo.js';
 import { torneoModel } from '../models/torneo.js';
 import '../models/associations.js';
 import { validateEquipos } from '../schemas/equipos.js';
+import { equipoUsuarioModel } from '../models/equipoUsuario.js';
+import { validateEquiposUsuarios } from '../schemas/equiposUsuarios.js';
+import db from '../database/connection.js';
 
 export class equipoController {
   static async getAll(req, res) {
@@ -39,7 +42,7 @@ export class equipoController {
           include: {
             model: torneoModel,
             attributes: ['id', 'descripcion', 'fechaInicio', 'fechaFin'],
-            through: { attributes: [] }, // Excluir atributos de la tabla intermedia
+            through: { attributes: [] },
           },
         });
       } else {
@@ -57,15 +60,36 @@ export class equipoController {
   }
 
   static async create(req, res) {
+    const transaction = await db.transaction();
     try {
       const result = validateEquipos(req.body);
       if (!result.success) {
+        await transaction.rollback();
         return res.status(400).json({ message: result.error });
       }
+      const newEquipo = await equipoModel.create(result.data, { transaction });
 
-      const newEquipo = await equipoModel.create(result.data);
+      // Crear la relación equipo-usuario
+      const equipoUsuarioData = {
+        idUsuario: req.user.id,
+        idEquipo: newEquipo.id,
+      };
+
+      const equipoUsuarioValidation =
+        validateEquiposUsuarios(equipoUsuarioData);
+      if (!equipoUsuarioValidation.success) {
+        await transaction.rollback();
+        return res.status(400).json({ message: equipoUsuarioValidation.error });
+      }
+      equipoUsuarioValidation.data.capitan = 1;
+      await equipoUsuarioModel.create(equipoUsuarioValidation.data, {
+        transaction,
+      });
+
+      await transaction.commit();
       res.status(201).json(newEquipo);
     } catch (error) {
+      await transaction.rollback();
       console.error(error);
       res.status(500).json({ message: 'Error al crear el equipo' });
     }
