@@ -77,6 +77,7 @@ export class equipoUsuarioController {
 
   static async create(req, res) {
     try {
+      req.body.idUsuario = req.user.id;
       const result = validateEquiposUsuarios(req.body);
       if (!result.success) {
         return res.status(400).json({ message: result.error });
@@ -91,12 +92,8 @@ export class equipoUsuarioController {
         return res.status(400).json({
           message: 'El equipo ya tiene 8 jugadores asignados',
         });
-      } // Si el equipo no tiene jugadores asignados, se asigna el capitan como 1 (primero que crea es capitan)
-      else if (jugadoresEquipo.length === 0) {
-        result.data.capitan = 1;
-      } else {
-        result.data.capitan = 0;
       }
+
       const newEquipoUsuario = await equipoUsuarioModel.create(result.data);
       res.status(201).json(newEquipoUsuario);
     } catch (error) {
