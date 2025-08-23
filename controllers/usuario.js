@@ -121,7 +121,13 @@ export class UsuarioController {
 
   static async update(req, res) {
     try {
-      const { id } = req.params;
+      const rol = req.user.rol;
+      let id;
+      if (rol == 'admin') {
+        id = req.params.id;
+      } else {
+        id = req.user.id;
+      }
       const result = validatePartialUsuarios(req.body);
       if (!result.success) {
         return res.status(400).json({ message: result.error });
