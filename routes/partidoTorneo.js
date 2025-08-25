@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { PartidoTorneoController } from '../controllers/partidoTorneo.js';
+import { authAdmin, authUser } from '../middlewares/auth.js';
 
 export const partidoTorneoRouter = Router();
 
-partidoTorneoRouter.get('/', PartidoTorneoController.getAll);
+partidoTorneoRouter.get('/', authUser, PartidoTorneoController.getAll);
 
-partidoTorneoRouter.get('/:id', PartidoTorneoController.getById);
+partidoTorneoRouter.get('/:id', authUser, PartidoTorneoController.getById);
 
-partidoTorneoRouter.post('/', PartidoTorneoController.create);
+partidoTorneoRouter.post('/', authAdmin, PartidoTorneoController.create);
 
-partidoTorneoRouter.patch('/:id', PartidoTorneoController.update);
+partidoTorneoRouter.patch('/:id', authAdmin, PartidoTorneoController.update);
 
-partidoTorneoRouter.delete('/:id', PartidoTorneoController.delete);
+partidoTorneoRouter.delete('/:id', authAdmin, PartidoTorneoController.delete);

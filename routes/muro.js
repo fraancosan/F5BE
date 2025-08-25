@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { muroController } from '../controllers/muro.js';
+import { authAdmin } from '../middlewares/auth.js';
 
 export const muroRouter = Router();
 
@@ -7,10 +8,10 @@ muroRouter.get('/', muroController.getAll);
 
 muroRouter.get('/vigente', muroController.getAllCurrent);
 
-muroRouter.get('/:id', muroController.getById);
+muroRouter.get('/:id', authAdmin, muroController.getById);
 
-muroRouter.post('/', muroController.create);
+muroRouter.post('/', authAdmin, muroController.create);
 
-muroRouter.patch('/:id', muroController.update);
+muroRouter.patch('/:id', authAdmin, muroController.update);
 
-muroRouter.delete('/:id', muroController.delete);
+muroRouter.delete('/:id', authAdmin, muroController.delete);

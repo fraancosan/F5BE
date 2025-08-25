@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { CanchaController } from '../controllers/cancha.js';
+import { authAdmin, authUser } from '../middlewares/auth.js';
 
 export const canchaRouter = Router();
 
-canchaRouter.get('/', CanchaController.getAll);
+canchaRouter.get('/', authUser, CanchaController.getAll);
 
-canchaRouter.get('/:id', CanchaController.getById);
+canchaRouter.get('/:id', authUser, CanchaController.getById);
 
-canchaRouter.post('/', CanchaController.create);
+canchaRouter.post('/', authAdmin, CanchaController.create);
 
-canchaRouter.patch('/:id', CanchaController.update);
+canchaRouter.patch('/:id', authAdmin, CanchaController.update);
 
-canchaRouter.delete('/:id', CanchaController.delete);
+canchaRouter.delete('/:id', authAdmin, CanchaController.delete);
