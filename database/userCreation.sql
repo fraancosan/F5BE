@@ -1,0 +1,4 @@
+-- Usuario MYSQL para deploys
+CREATE USER 'rodo'@'%' IDENTIFIED BY 'password1234';
+GRANT ALL PRIVILEGES ON `f5_rodo`.* TO 'rodo'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
