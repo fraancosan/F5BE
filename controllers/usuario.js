@@ -21,6 +21,7 @@ export class UsuarioController {
       const usuarios = await usuarioModel.findAll({
         where: mail ? { mail } : {},
         order: [['nombre', 'ASC']],
+        attributes: { exclude: ['contraseña'] },
       });
       if (usuarios.length === 0) {
         return res.status(404).json({ message: 'No se encontraron usuarios' });
@@ -35,7 +36,9 @@ export class UsuarioController {
   static async getById(req, res) {
     try {
       const { id } = req.params;
-      const usuario = await usuarioModel.findByPk(id);
+      const usuario = await usuarioModel.findByPk(id, {
+        attributes: { exclude: ['contraseña'] },
+      });
       if (!usuario) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
       }
@@ -107,7 +110,9 @@ export class UsuarioController {
       result.data.contraseña = await bcrypt.hash(result.data.contraseña, salt);
 
       const usuario = await usuarioModel.create(result.data);
-      res.status(201).json(usuario);
+
+      const { contraseña, rol, ...usuarioData } = usuario.toJSON();
+      res.status(201).json(usuarioData);
     } catch (error) {
       if (error.message.includes('Validation error')) {
         res
@@ -146,9 +151,13 @@ export class UsuarioController {
           salt,
         );
       }
-
       await usuario.update(result.data);
-      res.status(200).json(usuario);
+
+      const usuarioData = usuario.toJSON();
+      delete usuarioData.contraseña;
+      delete usuarioData.rol;
+
+      res.status(200).json(usuarioData);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al actualizar el usuario' });
