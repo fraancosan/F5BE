@@ -13,6 +13,11 @@
 - `DATABASE_DB`: This should be the name of the database you want to connect to.
 - `PORT_DB`: This is the port number on which your database server is running. The default for MySQL is `3306`, but it may vary based on your setup.
 
+- `DB_POOL_MAX`: This is the maximum number of connections allowed in the database connection pool. Adjust this based on your application's needs and database server capacity.
+- `DB_POOL_MIN`: This is the minimum number of connections to maintain in the database connection pool.
+- `DB_POOL_IDLE`: This is the maximum time, in milliseconds, that a connection can remain idle in the pool before being released.
+- `DB_POOL_ACQUIRE`: This is the maximum time, in milliseconds, that the pool will try to get a connection before throwing an error.
+
 ## Email
 
 - `NAME_EMAIL`: This should be the name you want to display in the "From" field of the email. It can be your name or the name of your application.
@@ -43,6 +48,11 @@ USER_DB=your_username
 PASSWORD_DB=your_password
 DATABASE_DB=your_database_name
 PORT_DB=3306
+
+DB_POOL_MAX=20
+DB_POOL_MIN=5
+DB_POOL_IDLE=10000
+DB_POOL_ACQUIRE=30000
 
 JWT_PASSWORD=yourJWTToken
 
