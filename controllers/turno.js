@@ -141,10 +141,12 @@ export class turnoController {
               [Op.between]: [hoy, quincena],
             },
             hora: {
-              [Op.between]: ['?', '?'],
+              [Op.between]: [
+                `${horaAbre.toString().padStart(2, '0')}:00:00`,
+                `${horaCierra.toString().padStart(2, '0')}:00:00`,
+              ],
             },
           },
-          replacements: [`${horaAbre}:00:00`, `${horaCierra}:00:00`],
         });
 
         let allTurnos = [];

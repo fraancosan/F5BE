@@ -10,6 +10,16 @@ const db = new Sequelize(
     dialect: 'mysql',
     port: process.env.PORT_DB,
     logging: false,
+    pool: {
+      max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX) : 10,
+      min: process.env.DB_POOL_MIN ? parseInt(process.env.DB_POOL_MIN) : 0,
+      acquire: process.env.DB_POOL_ACQUIRE
+        ? parseInt(process.env.DB_POOL_ACQUIRE)
+        : 30000,
+      idle: process.env.DB_POOL_IDLE
+        ? parseInt(process.env.DB_POOL_IDLE)
+        : 10000,
+    },
   },
 );
 
