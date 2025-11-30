@@ -33,6 +33,14 @@ export class UsuarioController {
     }
   }
 
+  static async getOwnUser(req, res) {
+    // first it uses the middleware to check if the user is logged in
+    // then send back the user data, previously stored in req.user
+    console.log(req.user);
+    const { contraseña, rol, ...user } = req.user.dataValues;
+    res.json(user);
+  }
+
   static async getById(req, res) {
     try {
       const { id } = req.params;
