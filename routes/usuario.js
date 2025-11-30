@@ -6,6 +6,8 @@ export const usuarioRouter = Router();
 
 usuarioRouter.get('/', authAdmin, UsuarioController.getAll);
 
+usuarioRouter.get('/mi-cuenta', authUser, UsuarioController.getOwnUser);
+
 usuarioRouter.get('/premium', authAdmin, UsuarioController.getUserPremium);
 
 usuarioRouter.get('/:id', authAdmin, UsuarioController.getById);
