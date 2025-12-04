@@ -452,10 +452,14 @@ export class turnoController {
           message: 'No se puede cancelar un turno compartido',
         });
       }
-
-      const refund = await mercadoPagoController.totalRefund({
-        paymentId: turno.idMP,
-      });
+      let refund;
+      if (turno.idMP) {
+        refund = await mercadoPagoController.totalRefund({
+          paymentId: turno.idMP,
+        });
+      } else {
+        refund = 200; // No hay pago, se puede cancelar directamente
+      }
 
       if (refund === 200) {
         await turnosModel.update(
