@@ -436,6 +436,7 @@ export class turnoController {
           [Op.and]: [
             literal(`id = UUID_TO_BIN(?)`),
             { estado: 'señado' },
+            { idUsuario: req.user.id },
             literal(`TIMESTAMPDIFF(HOUR, ?, CONCAT(fecha,' ',hora)) >= 6`),
           ],
         },
@@ -465,8 +466,7 @@ export class turnoController {
         await turnosModel.update(
           { estado: 'cancelado' },
           {
-            where: literal(`id = UUID_TO_BIN(?)`),
-            replacements: [id],
+            where: literal(`id = UUID_TO_BIN('${turno.id}')`),
           },
         );
         res.status(200).json({ message: 'Turno cancelado exitosamente' });
