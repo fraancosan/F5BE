@@ -16,7 +16,17 @@ import { getLocalDate } from '../utils/common.js';
 export class turnoController {
   static async getAll(req, res) {
     try {
-      const { fechai, fechaf, horai, horaf, estado, ordenFecha } = req.query;
+      const {
+        fechai,
+        fechaf,
+        horai,
+        horaf,
+        estado,
+        buscaRival,
+        hasIdMP,
+        hasIdMPCompartido,
+        ordenFecha,
+      } = req.query;
       let where = {};
 
       if (req.user.rol !== 'admin') {
@@ -56,6 +66,22 @@ export class turnoController {
 
       if (estado) {
         where.estado = estado;
+      }
+      if (buscaRival === '1') {
+        where.buscandoRival = true;
+      } else if (buscaRival === '0') {
+        where.buscandoRival = false;
+      }
+      if (hasIdMP === '1') {
+        where.idMP = { [Op.ne]: null };
+      } else if (hasIdMP === '0') {
+        where.idMP = null;
+      }
+
+      if (hasIdMPCompartido === '1') {
+        where.idMPCompartido = { [Op.ne]: null };
+      } else if (hasIdMPCompartido === '0') {
+        where.idMPCompartido = null;
       }
 
       const turnos = await turnosModel.findAll({
