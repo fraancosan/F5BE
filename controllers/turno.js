@@ -16,7 +16,7 @@ import { getLocalDate } from '../utils/common.js';
 export class turnoController {
   static async getAll(req, res) {
     try {
-      const { fechai, fechaf, horai, horaf } = req.query;
+      const { fechai, fechaf, horai, horaf, estado, ordenFecha } = req.query;
       let where = {};
 
       if (req.user.rol !== 'admin') {
@@ -54,10 +54,14 @@ export class turnoController {
         where.hora = { [Op.lte]: horaFin };
       }
 
+      if (estado) {
+        where.estado = estado;
+      }
+
       const turnos = await turnosModel.findAll({
         where,
         order: [
-          ['fecha', 'ASC'],
+          ['fecha', ordenFecha === 'asc' ? 'ASC' : 'DESC'],
           ['hora', 'ASC'],
         ],
       });
