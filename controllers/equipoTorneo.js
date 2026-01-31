@@ -72,4 +72,20 @@ export class equipoTorneoController {
       }
     }
   }
+
+  static async getAllById(req, res) {
+    try {
+      const { idTorneo, idEquipo } = req.query;
+
+      if (idTorneo) {
+        const cantidad = await getCantidadEquipos(idTorneo);
+        return res.status(200).json({cantidad: Number(cantidad || 0)});
+      }
+    const inscripciones = await equipoTorneoModel.findAll();
+    res.status(200).json(inscripciones);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener las inscripciones' });
+    }
+  }
 }
