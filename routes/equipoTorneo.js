@@ -4,6 +4,12 @@ import { authUser } from '../middlewares/auth.js';
 
 export const equipoTorneoRouter = Router();
 
+equipoTorneoRouter.get(
+  '/',
+  authUser,
+  equipoTorneoController.getAllById,
+);
+
 equipoTorneoRouter.post(
   '/:idEquipo/:idTorneo',
   authUser,

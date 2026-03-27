@@ -72,4 +72,22 @@ export class equipoTorneoController {
       }
     }
   }
+
+  static async getAllById(req, res) {
+    try {
+      const { idTorneo } = req.query;
+
+      if (!idTorneo){
+        return res.status(400).json({ message: 'idTorneo es requerido' });
+      }
+
+      if (idTorneo) {
+        const cantidad = await getCantidadEquipos(idTorneo);
+        return res.status(200).json({cantidad: Number(cantidad || 0)});
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al procesar la solicitud' });
+    }
+  }
 }
