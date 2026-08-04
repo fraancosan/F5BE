@@ -2,26 +2,22 @@ import { equipoUsuarioModel } from '../models/equipoUsuario.js';
 import { equipoModel } from '../models/equipo.js';
 import { usuarioModel } from '../models/Usuario.js';
 import { Op } from 'sequelize';
-import {
-  validateEquiposUsuarios,
-  validatePartialEquiposUsuarios,
-} from '../schemas/equiposUsuarios.js';
 
 export class equipoUsuarioController {
   static async getAll(req, res) {
     try {
-      const idUsuario = req.query.idUsuario;
+      const idUsuario = req.user.id;
       const idEquipo = req.query.idEquipo;
       const equiposUsuarios = await equipoUsuarioModel.findAll({
         where: {
-          ...(idUsuario && { idUsuario: { [Op.eq]: idUsuario } }),
+          idUsuario,
           ...(idEquipo && { idEquipo: { [Op.eq]: idEquipo } }),
         },
         include: [
           {
             model: equipoModel,
             as: 'Equipo',
-            attributes: ['nombre'],
+            attributes: ['nombre', 'linkInvitacion'],
           },
           {
             model: usuarioModel,
@@ -36,6 +32,47 @@ export class equipoUsuarioController {
           .json({ message: 'No se encontró relación equipo-usuario' });
       }
       res.status(200).json(equiposUsuarios);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: 'Error al obtener relación equipo-usuario' });
+    }
+  }
+
+  static async getAllMiembros(req, res) {
+    try {
+      const idUsuario = req.user.id;
+      const { idEquipo } = req.params;
+      const equipo = await equipoUsuarioModel.findAll({
+        where: {
+          idUsuario,
+          idEquipo,
+        }});
+      if (equipo.length === 0) {
+        return res
+          .status(404)
+          .json({ message: 'No se encontró relación equipo-usuario' });
+      } else {
+        const equiposUsuarios = await equipoUsuarioModel.findAll({
+          where: {
+            idEquipo,
+          },
+          include: [
+            {
+              model: equipoModel,
+              as: 'Equipo',
+              attributes: ['nombre', 'linkInvitacion'],
+            },
+            {
+              model: usuarioModel,
+              as: 'Usuario',
+              attributes: ['nombre'],
+            },
+          ],
+        });
+        res.status(200).json(equiposUsuarios);
+      }
     } catch (error) {
       console.error(error);
       res
@@ -77,67 +114,80 @@ export class equipoUsuarioController {
 
   static async create(req, res) {
     try {
-      req.body.idUsuario = req.user.id;
-      const result = validateEquiposUsuarios(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: result.error });
-      }
-      const jugadoresEquipo = await equipoUsuarioModel.findAll({
-        where: {
-          idEquipo: result.data.idEquipo,
-        },
-      });
-      // Si el equipo ya tiene 8 jugadores asignados, no se puede agregar más
-      if (jugadoresEquipo.length >= 8) {
+      // se une al equipo mediante link de invitacion
+      const idUsuario = req.user.id;
+      const { linkInvitacion } = req.body;
+      if (!linkInvitacion) {
         return res.status(400).json({
-          message: 'El equipo ya tiene 8 jugadores asignados',
+          message: 'Se requiere el link de invitación para unirse al equipo',
         });
+      } else {
+        const equipo = await equipoModel.findOne({ where: { linkInvitacion } });
+        if (!equipo) {
+          return res.status(404).json({
+            message:
+              'No se encontró un equipo con el link de invitación proporcionado',
+          });
+        } else {
+          const unido = await equipoUsuarioModel.findOne({
+            where: {
+              idUsuario,
+              idEquipo: equipo.id,
+            },
+          });
+          if (unido) {
+            return res.status(400).json({
+              message: 'El usuario ya está unido al equipo',
+            });
+          } else {
+            const jugadoresEquipo = await equipoUsuarioModel.findAll({
+              where: {
+                idEquipo: equipo.id,
+              },
+            });
+            // Si el equipo ya tiene 8 jugadores asignados, no se puede agregar más
+            if (jugadoresEquipo.length >= 8) {
+              return res.status(400).json({
+                message: 'El equipo ya tiene 8 jugadores asignados',
+              });
+            } else {
+              const newEquipoUsuario = await equipoUsuarioModel.create({
+                idUsuario,
+                idEquipo: equipo.id,
+                capitan: false,
+              });
+            res.status(201).json(newEquipoUsuario);
+          }
+        }
+        }
       }
-
-      const newEquipoUsuario = await equipoUsuarioModel.create(result.data);
-      res.status(201).json(newEquipoUsuario);
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({ message: 'Error al crear relación equipo-usuario' });
-    }
-  }
-
-  static async update(req, res) {
-    try {
-      const { id } = req.params;
-      const result = validatePartialEquiposUsuarios(req.body);
-      if (!result.success) {
-        return res.status(400).json({ message: result.error });
-      }
-      const equipoUsuario = await equipoUsuarioModel.findByPk(id);
-      if (!equipoUsuario) {
-        return res
-          .status(404)
-          .json({ message: 'Relación equipo-usuario no encontrada' });
-      }
-      await equipoUsuario.update(result.data);
-      res.status(200).json(equipoUsuario);
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ message: 'Error al actualizar relación equipo-usuario' });
+      res.status(500).json({ message: 'Error al unirse al equipo' });
     }
   }
 
   static async delete(req, res) {
     try {
       const { id } = req.params;
-      const equipoUsuario = await equipoUsuarioModel.findByPk(id);
+      const equipoUsuario = await equipoUsuarioModel.findOne({
+        where: { id, idUsuario: req.user.id },
+      });
       if (!equipoUsuario) {
         return res
           .status(404)
           .json({ message: 'Relación equipo-usuario no encontrada' });
+      } else if (equipoUsuario.capitan) {
+        // si es capitan borro el equipo y todas las relaciones
+        await equipoModel.destroy({ where: { id: equipoUsuario.idEquipo } });
+        await equipoUsuarioModel.destroy({
+          where: { idEquipo: equipoUsuario.idEquipo },
+        });
+        res.status(200).json({ message: 'Equipo eliminado' });
+      } else {
+        await equipoUsuario.destroy();
+        res.status(200).json({ message: 'Equipo abandonado' });
       }
-      await equipoUsuario.destroy();
-      res.status(200).json({ message: 'Relación eliminada' });
     } catch (error) {
       console.error(error);
       res

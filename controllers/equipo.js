@@ -3,8 +3,8 @@ import { torneoModel } from '../models/torneo.js';
 import '../models/associations.js';
 import { validateEquipos } from '../schemas/equipos.js';
 import { equipoUsuarioModel } from '../models/equipoUsuario.js';
-import { validateEquiposUsuarios } from '../schemas/equiposUsuarios.js';
 import db from '../database/connection.js';
+import { v4 } from 'uuid';
 
 export class equipoController {
   static async getAll(req, res) {
@@ -73,16 +73,10 @@ export class equipoController {
       const equipoUsuarioData = {
         idUsuario: req.user.id,
         idEquipo: newEquipo.id,
+        capitan: 1
       };
 
-      const equipoUsuarioValidation =
-        validateEquiposUsuarios(equipoUsuarioData);
-      if (!equipoUsuarioValidation.success) {
-        await transaction.rollback();
-        return res.status(400).json({ message: equipoUsuarioValidation.error });
-      }
-      equipoUsuarioValidation.data.capitan = 1;
-      await equipoUsuarioModel.create(equipoUsuarioValidation.data, {
+      await equipoUsuarioModel.create(equipoUsuarioData, {
         transaction,
       });
 
@@ -113,6 +107,49 @@ export class equipoController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error al actualizar el equipo' });
+    }
+  }
+
+  static async createLink(req, res) {
+    try {
+      const { id } = req.params;
+      const equipo = await equipoUsuarioModel.findOne({
+        where: {
+          idEquipo: id,
+          idUsuario: req.user.id,
+        }
+      })
+      if (!equipo) {
+        return res.status(404).json({ message: 'Equipo no encontrado' });
+      } else {
+        const link = v4();
+        await equipoModel.update({linkInvitacion: link}, {where: {id}});
+        res.status(200).json({ message: `El enlace es: ${link}`, linkInvitacion: link });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al crear el link de invitación' });
+    }
+  }
+
+  static async deleteLink(req, res) {
+    try {
+      const { id } = req.params;
+      const equipo = await equipoUsuarioModel.findOne({
+        where: {
+          idEquipo: id,
+          idUsuario: req.user.id,
+        },
+      });
+      if (!equipo) {
+        return res.status(404).json({ message: 'Equipo no encontrado' });
+      } else {
+        await equipoModel.update({ linkInvitacion: null }, { where: { id } });
+        res.status(200).json({ message: 'Link de invitación eliminado' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al eliminar el link de invitación' });
     }
   }
 

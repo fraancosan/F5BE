@@ -21,6 +21,7 @@ CREATE TABLE Canchas (
 CREATE TABLE Equipos (
     id INT AUTO_INCREMENT NOT NULL,
     nombre VARCHAR(60) NOT NULL,
+    linkInvitacion VARCHAR(255) NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
@@ -43,8 +44,8 @@ CREATE TABLE EquiposTorneos (
     urlPreferenciaPago VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
     CONSTRAINT unique_equipo_torneo UNIQUE (idEquipo, idTorneo),
-    CONSTRAINT FK_EquiposTorneosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id),
-    CONSTRAINT FK_EquiposTorneosTorneos FOREIGN KEY (idTorneo) REFERENCES Torneos(id)
+    CONSTRAINT FK_EquiposTorneosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id) ON DELETE CASCADE,
+    CONSTRAINT FK_EquiposTorneosTorneos FOREIGN KEY (idTorneo) REFERENCES Torneos(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Muro (
@@ -64,7 +65,7 @@ CREATE TABLE Politicas (
 
 CREATE TABLE Turnos (
     id BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID())),
-    idCancha INT NOT NULL,
+    idCancha INT NULL,
     idUsuario INT NOT NULL,
     idUsuarioCompartido INT NULL,
     fecha DATE NOT NULL,
@@ -81,9 +82,9 @@ CREATE TABLE Turnos (
     urlPreferenciaPago VARCHAR(255) DEFAULT NULL,
     urlPreferenciaPagoCompartido VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT FK_TurnosCanchas FOREIGN KEY (idCancha) REFERENCES Canchas(id),
-    CONSTRAINT FK_TurnosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id),
-    CONSTRAINT FK_TurnosUsuariosCompartido FOREIGN KEY (idUsuarioCompartido) REFERENCES Usuarios(id)
+    CONSTRAINT FK_TurnosCanchas FOREIGN KEY (idCancha) REFERENCES Canchas(id) ON DELETE SET NULL,
+    CONSTRAINT FK_TurnosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT FK_TurnosUsuariosCompartido FOREIGN KEY (idUsuarioCompartido) REFERENCES Usuarios(id) ON DELETE SET NULL
 );
 
 CREATE TABLE EquiposUsuarios (
@@ -92,20 +93,20 @@ CREATE TABLE EquiposUsuarios (
     idEquipo INT NOT NULL,
     capitan TINYINT(1) NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT FK_EquiposUsuariosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id),
-    CONSTRAINT FK_EquiposUsuariosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id),
+    CONSTRAINT FK_EquiposUsuariosUsuarios FOREIGN KEY (idUsuario) REFERENCES Usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT FK_EquiposUsuariosEquipos FOREIGN KEY (idEquipo) REFERENCES Equipos(id) ON DELETE CASCADE,
     CONSTRAINT unique_equipo_usuario UNIQUE (idEquipo, idUsuario)
 );
 
 CREATE TABLE PartidosTorneo (
     id INT AUTO_INCREMENT NOT NULL,
-    idEquipo1 INT NOT NULL,
-    idEquipo2 INT NOT NULL,
+    idEquipo1 INT NULL,
+    idEquipo2 INT NULL,
     idTorneo INT NOT NULL,
     resultado VARCHAR(30) NOT NULL,
     fecha DATE NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT FK_PartidosTorneoEquipos1 FOREIGN KEY (idEquipo1) REFERENCES Equipos(id),
-    CONSTRAINT FK_PartidosTorneoEquipos2 FOREIGN KEY (idEquipo2) REFERENCES Equipos(id),
+    CONSTRAINT FK_PartidosTorneoEquipos1 FOREIGN KEY (idEquipo1) REFERENCES Equipos(id) ON DELETE SET NULL,
+    CONSTRAINT FK_PartidosTorneoEquipos2 FOREIGN KEY (idEquipo2) REFERENCES Equipos(id) ON DELETE SET NULL,
     CONSTRAINT FK_PartidosTorneoTorneos FOREIGN KEY (idTorneo) REFERENCES Torneos(id)
 );
