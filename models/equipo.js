@@ -8,6 +8,11 @@ const equipoModel = db.define(
       type: DataTypes.STRING(60),
       allowNull: false,
     },
+    linkInvitacion: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+    }
   },
   {
     freezeTableName: false,
