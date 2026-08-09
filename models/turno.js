@@ -215,10 +215,7 @@ async function sendEmailNotification() {
       `
       SELECT u.mail
       FROM Turnos t
-      JOIN Usuarios u 
-      ON 
-        t.idUsuario = u.id
-        OR t.idUsuarioCompartido = u.id
+      JOIN Usuarios u ON t.idUsuario = u.id
       WHERE 
         t.estado = 'señado'
         AND t.idMP IS NOT NULL
@@ -231,6 +228,17 @@ async function sendEmailNotification() {
             AND t.idMPCompartido IS NOT NULL
           )
         )
+      UNION
+      SELECT u.mail
+      FROM Turnos t
+      JOIN Usuarios u ON t.idUsuarioCompartido = u.id
+      WHERE 
+        t.estado = 'señado'
+        AND t.idMP IS NOT NULL
+        AND TIMESTAMPDIFF(DAY, ?, t.fecha) = 1
+        AND t.buscandoRival = 1
+        AND t.idUsuarioCompartido IS NOT NULL
+        AND t.idMPCompartido IS NOT NULL
       `,
       {
         replacements: [fecha],
