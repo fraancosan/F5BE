@@ -14,7 +14,7 @@ const partidoTorneoModel = db.define(
     },
     idEquipo1: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: equipoModel,
         key: 'id',
@@ -22,7 +22,7 @@ const partidoTorneoModel = db.define(
     },
     idEquipo2: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: equipoModel,
         key: 'id',
@@ -54,10 +54,12 @@ const partidoTorneoModel = db.define(
 partidoTorneoModel.belongsTo(equipoModel, {
   foreignKey: 'idEquipo1',
   as: 'Equipo1',
+  onDelete: 'SET NULL',
 });
 partidoTorneoModel.belongsTo(equipoModel, {
   foreignKey: 'idEquipo2',
   as: 'Equipo2',
+  onDelete: 'SET NULL',
 });
 
 // Asociación entre PartidosTorneo y Torneos
