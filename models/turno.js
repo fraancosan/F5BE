@@ -30,7 +30,8 @@ const turnosModel = db.define(
         model: canchaModel,
         key: 'id',
       },
-      allowNull: false,
+      allowNull: true,
+      onDelete: 'SET NULL',
     },
     idUsuario: {
       type: DataTypes.INTEGER,
@@ -47,6 +48,7 @@ const turnosModel = db.define(
         key: 'id',
       },
       allowNull: true,
+      onDelete: 'SET NULL',
     },
     fecha: {
       type: DataTypes.DATEONLY,
