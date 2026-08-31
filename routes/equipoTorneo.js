@@ -15,3 +15,10 @@ equipoTorneoRouter.post(
   authUser,
   equipoTorneoController.addTorneo,
 );
+
+
+equipoTorneoRouter.get(
+  '/:idTorneo',
+  authUser,
+  equipoTorneoController.getEquiposTorneo,
+)

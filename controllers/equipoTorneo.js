@@ -90,4 +90,30 @@ export class equipoTorneoController {
       res.status(500).json({ message: 'Error al procesar la solicitud' });
     }
   }
+
+  static async getEquiposTorneo (req, res) {
+    try {
+      const { idTorneo } = req.params;
+
+      if (!idTorneo){
+        return res.status(400).json({ message: 'idTorneo es requerido' });
+      }
+      if (idTorneo) {
+        const equiposTorneo = await equipoTorneoModel.findAll({
+          where: { idTorneo },
+          include: [
+            {
+              model: equipoModel,
+              as: 'equipo',
+            },
+          ],
+          order: [['id', 'ASC']],
+        });
+        return res.status(200).json(equiposTorneo);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener los equipos del torneo' });
+    }
+  }
 }
