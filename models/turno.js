@@ -243,7 +243,7 @@ async function sendEmailNotification() {
         AND t.idMPCompartido IS NOT NULL
       `,
       {
-        replacements: [fecha],
+        replacements: [fecha, fecha],
         type: QueryTypes.SELECT,
       },
     );
