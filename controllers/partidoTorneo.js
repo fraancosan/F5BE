@@ -83,6 +83,9 @@ export class PartidoTorneoController {
   static async update(req, res) {
     try {
       const { id } = req.params;
+      if (req.body.fecha) {
+        req.body.fecha = new Date(req.body.fecha);
+      }
       const result = validatePartialPartidosTorneos(req.body);
       if (!result.success) {
         return res.status(400).json({ message: result.error });
