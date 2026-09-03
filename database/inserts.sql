@@ -451,7 +451,7 @@ INSERT INTO Turnos (idCancha, idUsuario, idUsuarioCompartido, fecha, hora, estad
 (5, 27, 31, '2026-09-22', '21:00:00', 'señado', 30000, 15000, 1, 0, NULL, NULL, NULL, NULL),
 (1, 35, 39, '2026-09-23', '22:00:00', 'señado', 30000, 15000, 1, 1, 'mp_s26', 'mp_cs26', 'url_s26', 'url_cs26'),
 (2, 43, 47, '2026-09-24', '23:00:00', 'señado', 30000, 15000, 1, 0, NULL, NULL, NULL, NULL),
-(3, 51, 55, '2026-09-25', '18:00:00', 'señado', 30000, 15000, 1, 1, 'mp_s27', 'mp_cs27', 'url_s27', 'url_cs27')
+(3, 51, 55, '2026-09-25', '18:00:00', 'señado', 30000, 15000, 1, 1, 'mp_s27', 'mp_cs27', 'url_s27', 'url_cs27'),
 
 -- PREMIUM
 
