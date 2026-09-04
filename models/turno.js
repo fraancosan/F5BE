@@ -123,7 +123,7 @@ async function updateIdMP({ id, idMP }) {
     await db.query(
       `
       UPDATE Turnos
-      SET idMP = ?
+      SET idMP = ?, estado = 'señado'
       WHERE id = UUID_TO_BIN(?)
       `,
       {
@@ -142,7 +142,7 @@ async function updateIdMPCompartido({ id, idMP }) {
     await db.query(
       `
       UPDATE Turnos
-      SET idMPCompartido = ?
+      SET idMPCompartido = ?, estado = 'señado'
       WHERE id = UUID_TO_BIN(?)
       `,
       {
