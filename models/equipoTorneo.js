@@ -2,6 +2,7 @@ import db from '../database/connection.js';
 import { DataTypes, QueryTypes } from 'sequelize';
 import { equipoModel } from './equipo.js';
 import { torneoModel } from './torneo.js';
+import { mercadoPagoController } from '../controllers/extras/mercadoPago.js';
 
 const equipoTorneoModel = db.define(
   'EquiposTorneos',
@@ -50,7 +51,7 @@ const equipoTorneoModel = db.define(
 
 async function updateIdMP({ id, idMP }) {
   try {
-    await db.query(
+    const [affectedRows] = await db.query(
       `
       UPDATE EquiposTorneos
       SET idMP = ?
@@ -61,6 +62,10 @@ async function updateIdMP({ id, idMP }) {
         type: QueryTypes.UPDATE,
       },
     );
+    if (affectedRows === 0) {
+      // ya se cancelo la reserva y no es posible reactivarla
+      await mercadoPagoController.totalRefund({ paymentId: idMP });
+    }
   } catch (error) {
     error.status = 500;
     throw error;
